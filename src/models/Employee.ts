@@ -5,14 +5,12 @@ let employeeSchema = new Schema({
 		type: String,
 		required: [true, "Name is required"],
 	},
-    friends: [mongoose.Types.ObjectId]
-
 });
 
 employeeSchema.post("save", function (doc, next) {
-    console.log(doc);
-    next();
-})
+	console.log(doc);
+	next();
+});
 
 export type IEmployee = InferSchemaType<typeof employeeSchema>;
 

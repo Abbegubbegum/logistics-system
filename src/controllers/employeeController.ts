@@ -1,7 +1,65 @@
-import employee from "../schemas/employeeSchema.js";
-import { Request, Response } from "express";
+import employeeModel, { IEmployee } from "../models/Employee.js";
 
-export async function createEmployee(req: Request, res: Response) {
-	employee.create(req.body);
-	res.status(200).send("Good");
+export function getAllEmployees() {
+	return new Promise<IEmployee[]>((resolve, reject) => {
+		employeeModel
+			.find()
+			.then((employees) => {
+				resolve(employees);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function getEmployeeByName(name: string): Promise<IEmployee> {
+	return new Promise<IEmployee>((resolve, reject) => {
+		employeeModel
+			.findOne({ name: name })
+			.then((employee) => {
+				if (employee) {
+					resolve(employee);
+				} else {
+					reject(new Error("Employee not found"));
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				reject(err);
+			});
+	});
+}
+
+export function createEmployee(newEmployee: IEmployee): Promise<void> {
+	return new Promise<void>((resolve, reject) => {
+		employeeModel
+			.create(newEmployee)
+			.then(() => {
+				resolve();
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function deleteEmployeeByName(name: string): Promise<void> {
+	return new Promise<void>((resolve, reject) => {
+		employeeModel
+			.deleteOne({ name: name })
+			.then((result) => {
+				if (result.deletedCount === 0) {
+					reject(new Error("Employee not found"));
+				} else {
+					resolve();
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
 }
