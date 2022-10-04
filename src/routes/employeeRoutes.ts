@@ -1,12 +1,19 @@
 import {
 	createEmployee,
+	deleteAllEmployees,
 	deleteEmployeeByName,
 	getAllEmployees,
 	getEmployeeByName,
 } from "../controllers/employeeController.js";
 import { Router } from "express";
-import { IEmployee } from "../models/Employee";
 import { isEmployee } from "../utils/typeChecker.js";
+import { isValidObjectId, Types } from "mongoose";
+import { IEmployee } from "../models/employee.js";
+import warehouseModel from "../models/warehouse.js";
+import {
+	getWarehouseByName,
+	getWarehouseIdByName,
+} from "../controllers/warehouseController.js";
 
 const router = Router();
 
@@ -52,15 +59,35 @@ router.get("/:name", (req, res) => {
 		});
 });
 
-router.post("/", (req, res) => {
-	let employee = req.body as IEmployee;
+router.post("/", async (req, res) => {
+	let name = req.body.name;
+	let warehouseName = req.body.warehouse;
 
-	if (!isEmployee(employee)) {
+	if (typeof name !== "string") {
+		res.status(400).send("Bad request, Name must be a string");
+		return;
+	}
+	if (typeof warehouseName !== "string") {
+		res.status(400).send("Bad request, Warehouse must be a string");
+		return;
+	}
+
+	let warehouseID = await getWarehouseIdByName(warehouseName).catch((err) => {
+		res.status(404).send("Warehouse not found");
+		return;
+	});
+
+	let newEmployee = {
+		name,
+		warehouseID,
+	};
+
+	if (!isEmployee(newEmployee)) {
 		res.status(400).send("Bad Request");
 		return;
 	}
 
-	createEmployee(employee)
+	createEmployee(newEmployee)
 		.then(() => {
 			res.sendStatus(201);
 			return;
@@ -68,6 +95,16 @@ router.post("/", (req, res) => {
 		.catch((err) => {
 			res.sendStatus(500);
 			return;
+		});
+});
+
+router.delete("/", (req, res) => {
+	deleteAllEmployees()
+		.then((count) => {
+			res.status(200).send(`Successfully deleted ${count} employees`);
+		})
+		.catch((err) => {
+			res.sendStatus(500);
 		});
 });
 

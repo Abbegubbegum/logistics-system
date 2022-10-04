@@ -1,4 +1,4 @@
-import employeeModel, { IEmployee } from "../models/Employee.js";
+import employeeModel, { IEmployee } from "../models/employee.js";
 
 export function getAllEmployees() {
 	return new Promise<IEmployee[]>((resolve, reject) => {
@@ -38,6 +38,20 @@ export function createEmployee(newEmployee: IEmployee): Promise<void> {
 			.create(newEmployee)
 			.then(() => {
 				resolve();
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function deleteAllEmployees(): Promise<number> {
+	return new Promise<number>((resolve, reject) => {
+		employeeModel
+			.deleteMany()
+			.then((result) => {
+				resolve(result.deletedCount);
 			})
 			.catch((err) => {
 				console.log(err);
