@@ -1,6 +1,7 @@
+import mongoose, { MongooseError } from "mongoose";
 import productModel, { IProduct } from "../models/product.js";
 
-export function getProductByName(name: string) {
+export function getProductIDByName(name: string) {
 	return new Promise<IProduct>((resolve, reject) => {
 		productModel
 			.findOneByName(name)
@@ -14,6 +15,23 @@ export function getProductByName(name: string) {
 			.catch((err) => {
 				console.log(err);
 				reject();
+			});
+	});
+}
+
+export function createProduct(product: IProduct) {
+	return new Promise<void>((resolve, reject) => {
+		productModel
+			.create(product)
+			.then(() => {
+				resolve();
+			})
+			.catch((err) => {
+				if (err.code === 11000) {
+					reject(new Error("Duplicate product"));
+				} else {
+					reject();
+				}
 			});
 	});
 }

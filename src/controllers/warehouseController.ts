@@ -62,8 +62,11 @@ export function createWarehouse(warehouse: IWarehouse) {
 				resolve();
 			})
 			.catch((err) => {
-				console.log(err);
-				reject();
+				if (err.code === 11000) {
+					reject(new Error("Duplicate product"));
+				} else {
+					reject();
+				}
 			});
 	});
 }
@@ -72,5 +75,20 @@ export function addProductToWarehouse(
 	warehouseName: string,
 	product: IWarehouseProduct
 ) {
-	return new Promise<void>((resolve, reject) => {});
+	return new Promise<void>((resolve, reject) => {
+		warehouseModel
+			.findOneByName(warehouseName)
+			.then((warehouse) => {
+				if (warehouse) {
+					warehouse.products.push(product);
+					resolve();
+				} else {
+					reject(new Error("Warehouse not found"));
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
 }

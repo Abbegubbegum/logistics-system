@@ -6,23 +6,11 @@ import {
 	getEmployeeByName,
 } from "../controllers/employeeController.js";
 import { Router } from "express";
-import { isEmployee } from "../utils/typeChecker.js";
-import {
-	getWarehouseIdByName,
-} from "../controllers/warehouseController.js";
+import { getWarehouseIdByName } from "../controllers/warehouseController.js";
+import warehouse from "../models/warehouse.js";
+import { request } from "http";
 
 const router = Router();
-
-router.all("/:name", (req, res, next) => {
-	let name = req.params.name;
-
-	if (typeof name !== "string") {
-		res.status(400).send("Bad Request, Parameter name must be a string");
-		return;
-	}
-
-	next();
-});
 
 router.get("/", (req, res) => {
 	getAllEmployees()
@@ -67,20 +55,22 @@ router.post("/", async (req, res) => {
 		return;
 	}
 
-	let warehouseID = await getWarehouseIdByName(warehouseName).catch((err) => {
-		res.status(404).send("Warehouse not found");
+	let warehouseID;
+	try {
+		warehouseID = await getWarehouseIdByName(warehouseName);
+	} catch (err) {
+		if (err instanceof Error) {
+			res.status(404).send("Warehouse not found");
+			return;
+		}
+		res.sendStatus(500);
 		return;
-	});
+	}
 
-	let newEmployee = {
+	let newEmployee: any = {
 		name,
 		warehouseID,
 	};
-
-	if (!isEmployee(newEmployee)) {
-		res.status(400).send("Bad Request");
-		return;
-	}
 
 	createEmployee(newEmployee)
 		.then(() => {
@@ -88,8 +78,12 @@ router.post("/", async (req, res) => {
 			return;
 		})
 		.catch((err) => {
-			res.sendStatus(500);
-			return;
+			if (err.message === "Duplicate product") {
+				res.status(400).send("Bad request, duplicate product name");
+			} else {
+				res.sendStatus(500);
+				return;
+			}
 		});
 });
 

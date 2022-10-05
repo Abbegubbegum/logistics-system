@@ -1,11 +1,14 @@
 import { Router } from "express";
 import {
+	addProductToWarehouse,
 	createWarehouse,
 	getAllWarehouses,
 	getWarehouseByName,
 } from "../controllers/warehouseController.js";
-import { isWarehouse, isWarehouseProduct } from "../utils/typeChecker.js";
 import { Types } from "mongoose";
+import { getProductIDByName } from "../controllers/productController.js";
+import { request } from "http";
+import { IWarehouse } from "../models/warehouse.js";
 
 const router = Router();
 
@@ -28,15 +31,11 @@ router.post("/", (req, res) => {
 		res.status(400).send("Bad request, name must be a string");
 		return;
 	}
-	let warehouse = {
+
+	let warehouse: any = {
 		name: name,
 		products: [],
 	};
-
-	if (!isWarehouse(warehouse)) {
-		res.status(400).send("Bad request");
-		return;
-	}
 
 	createWarehouse(warehouse)
 		.then(() => {
@@ -68,31 +67,36 @@ router.post("/:warehouse/products", async (req, res) => {
 		return;
 	}
 
-	// Getproductidfromname(productName)
+	let productID;
 
-	let productID = new Types.ObjectId(3221123);
+	try {
+		productID = await getProductIDByName(productName);
+	} catch (err) {
+		if (err instanceof Error) {
+			res.status(404).send("Product not found");
+		} else {
+			res.sendStatus(500);
+		}
+		return;
+	}
 
-	let product = {
+	let product: any = {
 		productID,
 		quantity,
 		shelfID,
 	};
 
-	if (!isWarehouseProduct(product)) {
-		res.sendStatus(400);
-	}
-
-	getWarehouseByName(warehouseName)
-		.then((warehouse) => {
-			warehouse.products.push(product);
+	addProductToWarehouse(warehouseName, product)
+		.then(() => {
+			res.sendStatus(201);
 		})
 		.catch((err: Error) => {
 			if (err.message === "Warehouse not found") {
 				res.status(404).send("Warehouse not found");
-				return;
-			} else {
+			} else if (err.message === "Duplicate product") {
+				res.status(400).send("Bad request, duplicate product name");
+			} else { 
 				res.sendStatus(500);
-				return;
 			}
 		});
 });
