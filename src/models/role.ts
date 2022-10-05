@@ -14,4 +14,4 @@ let roleSchema = new Schema({
 
 export type IRole = InferSchemaType<typeof roleSchema>;
 
-export default model("Roles", roleSchema);
+export default model("Role", roleSchema);

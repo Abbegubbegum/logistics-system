@@ -1,5 +1,8 @@
 import { Types } from "mongoose";
-import warehouseModel, { IWarehouse } from "../models/warehouse.js";
+import warehouseModel, {
+	IWarehouse,
+	IWarehouseProduct,
+} from "../models/warehouse.js";
 
 export function getAllWarehouses() {
 	return new Promise<IWarehouse[]>((resolve, reject) => {
@@ -18,7 +21,7 @@ export function getAllWarehouses() {
 export function getWarehouseIdByName(name: string) {
 	return new Promise<Types.ObjectId>((resolve, reject) => {
 		warehouseModel
-			.findOne({ name: name })
+			.findOneByName(name)
 			.then((warehouse) => {
 				if (warehouse) {
 					resolve(warehouse._id);
@@ -36,7 +39,7 @@ export function getWarehouseIdByName(name: string) {
 export function getWarehouseByName(name: string) {
 	return new Promise<IWarehouse>((resolve, reject) => {
 		warehouseModel
-			.findOne({ name: name })
+			.findOneByName(name)
 			.then((warehouse) => {
 				if (warehouse) {
 					resolve(warehouse);
@@ -63,4 +66,11 @@ export function createWarehouse(warehouse: IWarehouse) {
 				reject();
 			});
 	});
+}
+
+export function addProductToWarehouse(
+	warehouseName: string,
+	product: IWarehouseProduct
+) {
+	return new Promise<void>((resolve, reject) => {});
 }

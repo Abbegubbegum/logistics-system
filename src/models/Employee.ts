@@ -1,20 +1,24 @@
 import { Schema, model, InferSchemaType, Types } from "mongoose";
 
-let employeeSchema = new Schema({
-	name: {
-		type: String,
-		required: [true, "Employee needs a name"],
+let employeeSchema = new Schema(
+	{
+		name: {
+			type: String,
+			required: [true, "Employee needs a name"],
+		},
+		warehouseID: {
+			type: Types.ObjectId,
+			required: [true, "Employee needs a Connected Warehouse ID"],
+		},
 	},
-	warehouseID: {
-		type: Types.ObjectId,
-		required: [true, "Employee needs a Connected Warehouse ID"],
-	},
-});
-
-employeeSchema.post("save", function (doc, next) {
-	console.log(`Employee with name ${doc.name} saved`);
-	next();
-});
+	{
+		statics: {
+			findOneByName(name: string) {
+				return this.findOne({ name: name });
+			},
+		},
+	}
+);
 
 export type IEmployee = InferSchemaType<typeof employeeSchema>;
 

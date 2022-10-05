@@ -7,11 +7,7 @@ import {
 } from "../controllers/employeeController.js";
 import { Router } from "express";
 import { isEmployee } from "../utils/typeChecker.js";
-import { isValidObjectId, Types } from "mongoose";
-import { IEmployee } from "../models/employee.js";
-import warehouseModel from "../models/warehouse.js";
 import {
-	getWarehouseByName,
 	getWarehouseIdByName,
 } from "../controllers/warehouseController.js";
 
@@ -52,7 +48,6 @@ router.get("/:name", (req, res) => {
 			if (err.message === "Employee not found") {
 				res.status(404).send("Employee not found");
 			} else {
-				console.log(err);
 				res.sendStatus(500);
 				return;
 			}
@@ -119,7 +114,6 @@ router.delete("/:name", (req, res) => {
 			if (err.message === "Employee not found") {
 				res.status(404).send("Employee not found");
 			} else {
-				console.log(err);
 				res.sendStatus(500);
 			}
 		});
