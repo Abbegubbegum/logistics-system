@@ -63,7 +63,7 @@ export function createWarehouse(warehouse: IWarehouse) {
 			})
 			.catch((err) => {
 				if (err.code === 11000) {
-					reject(new Error("Duplicate product"));
+					reject(new Error("Duplicate warehouse"));
 				} else {
 					reject();
 				}

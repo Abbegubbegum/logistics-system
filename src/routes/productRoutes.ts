@@ -21,12 +21,11 @@ router.post("/", (req, res) => {
 	}
 
 	if (typeof weight !== "number" && weight !== undefined) {
-		res.status(400).send(
+		return res.status(400).send(
 			"Bad request, weight must be a number or undefined"
 		);
-		return;
 	}
-
+ 
 	let product: any = {
 		name,
 		price,

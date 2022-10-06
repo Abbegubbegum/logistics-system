@@ -10,6 +10,10 @@ let employeeSchema = new Schema(
 			type: Types.ObjectId,
 			required: [true, "Employee needs a Connected Warehouse ID"],
 		},
+		roleID: {
+			type: Types.ObjectId,
+			required: [true, "Employee needs a Role ID"],
+		},
 	},
 	{
 		statics: {

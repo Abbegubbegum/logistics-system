@@ -7,8 +7,7 @@ import {
 } from "../controllers/employeeController.js";
 import { Router } from "express";
 import { getWarehouseIdByName } from "../controllers/warehouseController.js";
-import warehouse from "../models/warehouse.js";
-import { request } from "http";
+import { getRoleIDByTitle } from "../controllers/roleController.js";
 
 const router = Router();
 
@@ -45,6 +44,7 @@ router.get("/:name", (req, res) => {
 router.post("/", async (req, res) => {
 	let name = req.body.name;
 	let warehouseName = req.body.warehouse;
+	let roleTitle = req.body.role;
 
 	if (typeof name !== "string") {
 		res.status(400).send("Bad request, Name must be a string");
@@ -54,10 +54,28 @@ router.post("/", async (req, res) => {
 		res.status(400).send("Bad request, Warehouse must be a string");
 		return;
 	}
+	if (typeof roleTitle !== "string") {
+		res.status(400).send("Bad request, Role must be a string");
+		return;
+	}
 
 	let warehouseID;
+
 	try {
 		warehouseID = await getWarehouseIdByName(warehouseName);
+	} catch (err) {
+		if (err instanceof Error) {
+			res.status(404).send("Warehouse not found");
+			return;
+		}
+		res.sendStatus(500);
+		return;
+	}
+
+	let roleID;
+
+	try {
+		roleID = await getRoleIDByTitle(roleTitle);
 	} catch (err) {
 		if (err instanceof Error) {
 			res.status(404).send("Warehouse not found");
@@ -70,6 +88,7 @@ router.post("/", async (req, res) => {
 	let newEmployee: any = {
 		name,
 		warehouseID,
+		roleID,
 	};
 
 	createEmployee(newEmployee)
@@ -78,12 +97,8 @@ router.post("/", async (req, res) => {
 			return;
 		})
 		.catch((err) => {
-			if (err.message === "Duplicate product") {
-				res.status(400).send("Bad request, duplicate product name");
-			} else {
-				res.sendStatus(500);
-				return;
-			}
+			res.sendStatus(500);
+			return;
 		});
 });
 

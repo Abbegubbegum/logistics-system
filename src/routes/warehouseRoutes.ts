@@ -93,9 +93,9 @@ router.post("/:warehouse/products", async (req, res) => {
 		.catch((err: Error) => {
 			if (err.message === "Warehouse not found") {
 				res.status(404).send("Warehouse not found");
-			} else if (err.message === "Duplicate product") {
-				res.status(400).send("Bad request, duplicate product name");
-			} else { 
+			} else if (err.message === "Duplicate warehouse") {
+				res.status(400).send("Bad request, duplicate warehouse name");
+			} else {
 				res.sendStatus(500);
 			}
 		});
