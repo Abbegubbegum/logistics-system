@@ -15,7 +15,15 @@ export function getAllOrders() {
 }
 
 export function createOrder(order: IOrder) {
-	return new Promise<IOrder>((resolve, reject) => {
-		
+	return new Promise<void>((resolve, reject) => {
+		orderModel
+			.create(order)
+			.then(() => {
+				resolve();
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
 	});
 }

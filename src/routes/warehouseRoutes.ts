@@ -46,7 +46,7 @@ router.post("/", (req, res) => {
 		});
 });
 
-router.post("/:warehouse/products", async (req, res) => {
+router.put("/:warehouse/products", async (req, res) => {
 	let warehouseName = req.params.warehouse;
 	let productName = req.body.product;
 	let quantity = req.body.quantity;
@@ -85,6 +85,8 @@ router.post("/:warehouse/products", async (req, res) => {
 		quantity,
 		shelfID,
 	};
+
+	console.log(product);
 
 	addProductToWarehouse(warehouseName, product)
 		.then(() => {

@@ -78,10 +78,16 @@ export function addProductToWarehouse(
 	return new Promise<void>((resolve, reject) => {
 		warehouseModel
 			.findOneByName(warehouseName)
-			.then((warehouse) => {
+			.then(async (warehouse) => {
 				if (warehouse) {
 					warehouse.products.push(product);
-					resolve();
+					try {
+						await warehouse.save();
+						resolve();
+					} catch (err) {
+						console.log(err);
+						reject();
+					}
 				} else {
 					reject(new Error("Warehouse not found"));
 				}

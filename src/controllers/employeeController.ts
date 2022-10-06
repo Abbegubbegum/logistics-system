@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import employeeModel, { IEmployee } from "../models/employee.js";
 
 export function getAllEmployees() {
@@ -32,6 +33,44 @@ export function getEmployeeByName(name: string): Promise<IEmployee> {
 	});
 }
 
+export function getEmployeeIDByName(name: string) {
+	return new Promise<Types.ObjectId>((resolve, reject) => {
+		employeeModel
+			.findOneByName(name)
+			.then(async (employee) => {
+				if (employee) {
+					resolve(employee._id);
+				} else {
+					reject(new Error("Employee not found"));
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function getGrabberIDByName(name: string) {
+	return new Promise<Types.ObjectId>((resolve, reject) => {
+		employeeModel
+			.findOneByName(name)
+			.then(async (employee) => {
+				if (employee) {
+					await employee.populate("roleID");
+					console.log((employee.roleID as any).title);
+					resolve(employee._id);
+				} else {
+					reject(new Error("Employee not found"));
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
 export function createEmployee(newEmployee: IEmployee): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		employeeModel
@@ -40,8 +79,11 @@ export function createEmployee(newEmployee: IEmployee): Promise<void> {
 				resolve();
 			})
 			.catch((err) => {
-				console.log(err);
-				reject();
+				if (err.code === 11000) {
+					reject(new Error("Duplicate employee"));
+				} else {
+					reject();
+				}
 			});
 	});
 }

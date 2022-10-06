@@ -97,6 +97,9 @@ router.post("/", async (req, res) => {
 			return;
 		})
 		.catch((err) => {
+			if (err.message === "Duplicate employee") {
+				res.status(400).send("Employee with name already exists");
+			}
 			res.sendStatus(500);
 			return;
 		});

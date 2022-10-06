@@ -1,13 +1,13 @@
-import mongoose, { MongooseError } from "mongoose";
+import mongoose, { MongooseError, Types } from "mongoose";
 import productModel, { IProduct } from "../models/product.js";
 
 export function getProductIDByName(name: string) {
-	return new Promise<IProduct>((resolve, reject) => {
+	return new Promise<Types.ObjectId>((resolve, reject) => {
 		productModel
 			.findOneByName(name)
 			.then((product) => {
 				if (product) {
-					resolve(product);
+					resolve(product._id);
 				} else {
 					reject(new Error("Product not found"));
 				}

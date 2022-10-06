@@ -3,6 +3,7 @@ import mongoose, { Schema, model, InferSchemaType, Types } from "mongoose";
 let warehouseProductSchema = new Schema({
 	productID: {
 		type: Types.ObjectId,
+		ref: "Product",
 		required: [true, "Warehouse Product needs a Product ID"],
 	},
 	quantity: {

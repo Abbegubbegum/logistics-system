@@ -1,6 +1,13 @@
+import { createOrder, getAllOrders } from "../controllers/orderController.js";
 import { Router } from "express";
-import { getAllOrders } from "../controllers/orderController.js";
 import { getProductIDByName } from "../controllers/productController.js";
+import { IOrder } from "../models/order.js";
+import { isValidObjectId, Types } from "mongoose";
+import {
+	getEmployeeByName,
+	getEmployeeIDByName,
+	getGrabberIDByName,
+} from "../controllers/employeeController.js";
 
 const router = Router();
 
@@ -16,7 +23,7 @@ router.get("/", (req, res) => {
 		});
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
 	let productsWithNames: Array<any> = req.body.products;
 
 	if (typeof productsWithNames !== "object") {
@@ -62,31 +69,84 @@ router.post("/", (req, res) => {
 
 	if (error) return;
 
-	let products = [];
+	let products: any[] = [];
 
-	productsWithNames.forEach((product, index) => {
-		let newProduct: any = {
-			quantity: product.quantity,
-		};
-		getProductIDByName(product.name)
+	for (let i = 0; i < productsWithNames.length; i++) {
+		let product = productsWithNames[i];
+		await getProductIDByName(product.name)
 			.then((productID) => {
-				newProduct.productID = productID;
+				products.push({
+					productID: productID,
+					quantity: product.quantity,
+				});
 			})
 			.catch((err: Error) => {
 				if (err.message === "Product not found") {
 					error = true;
-					return res
-						.status(400)
-						.send(`Bad request at ${index}, couldn't find product`);
+					res.status(400).send(
+						`Bad request at ${i}, couldn't find product`
+					);
+					return;
 				} else {
 					error = true;
-					return res.sendStatus(500);
+					res.sendStatus(500);
+					return;
 				}
 			});
-		products.push(newProduct);
-	});
+	}
 
 	if (error) return;
+
+	let order: any = {
+		products,
+	};
+
+	createOrder(order)
+		.then(() => {
+			return res.sendStatus(201);
+		})
+		.catch((err) => {
+			return res.sendStatus(500);
+		});
+});
+
+router.put("/:orderID/grabber", async (req, res) => {
+	let orderIDString = req.params.orderID;
+	let grabberName = req.body.name;
+
+	if (!isValidObjectId(orderIDString)) {
+		return res.status(400).send("Bad Request, invalid order ID");
+	}
+
+	if (typeof grabberName !== "string") {
+		return res.status(400).send("Bad Request, invalid name");
+	}
+
+	let orderID = new Types.ObjectId(orderIDString);
+
+	let grabberID;
+	try {
+		grabberID = await getGrabberIDByName(grabberName);
+	} catch (err) {
+		if (err instanceof Error) {
+			return res.status(400).send("Bad Request, Employee not found");
+		}
+	}
+});
+
+router.put("/:orderID/packed", (req, res) => {
+	let orderIDString = req.params.orderID;
+	let grabberName = req.body.name;
+
+	if (!isValidObjectId(orderIDString)) {
+		return res.status(400).send("Bad Request, invalid order ID");
+	}
+
+	if (typeof grabberName !== "string") {
+		return res.status(400).send("Bad Request, invalid grabber ID");
+	}
+
+	let orderID = new Types.ObjectId(orderIDString);
 });
 
 export default router;
