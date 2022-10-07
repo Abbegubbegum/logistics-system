@@ -1,13 +1,8 @@
 import { createOrder, getAllOrders } from "../controllers/orderController.js";
 import { Router } from "express";
 import { getProductIDByName } from "../controllers/productController.js";
-import { IOrder } from "../models/order.js";
 import { isValidObjectId, Types } from "mongoose";
-import {
-	getEmployeeByName,
-	getEmployeeIDByName,
-	getGrabberIDByName,
-} from "../controllers/employeeController.js";
+import { getGrabberIDByName } from "../controllers/employeeController.js";
 
 const router = Router();
 
@@ -76,7 +71,7 @@ router.post("/", async (req, res) => {
 		await getProductIDByName(product.name)
 			.then((productID) => {
 				products.push({
-					productID: productID,
+					product: productID,
 					quantity: product.quantity,
 				});
 			})
@@ -124,14 +119,29 @@ router.put("/:orderID/grabber", async (req, res) => {
 
 	let orderID = new Types.ObjectId(orderIDString);
 
-	let grabberID;
+	let error = false;
+
+	let grabber;
 	try {
-		grabberID = await getGrabberIDByName(grabberName);
+		grabber = await getGrabberIDByName(grabberName);
 	} catch (err) {
 		if (err instanceof Error) {
-			return res.status(400).send("Bad Request, Employee not found");
+			if (err.message === "Employee not found") {
+				error = true;
+				return res.status(400).send("Bad Request, Employee not found");
+			} else {
+				error = true;
+				return res
+					.status(400)
+					.send("Bad Request, Employee not a grabber");
+			}
+		} else {
+			error = true;
+			return res.sendStatus(500);
 		}
 	}
+
+	if (error) return;
 });
 
 router.put("/:orderID/packed", (req, res) => {

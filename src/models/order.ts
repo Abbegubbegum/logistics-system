@@ -1,7 +1,7 @@
 import { Schema, model, InferSchemaType, Types } from "mongoose";
 
 let orderProductSchema = new Schema({
-	productID: {
+	product: {
 		type: Types.ObjectId,
 		ref: "Product",
 		required: [true, "Order Product needs a product ID"],

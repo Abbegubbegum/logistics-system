@@ -57,9 +57,13 @@ export function getGrabberIDByName(name: string) {
 			.findOneByName(name)
 			.then(async (employee) => {
 				if (employee) {
-					await employee.populate("roleID");
-					console.log((employee.roleID as any).title);
-					resolve(employee._id);
+					await employee.populate("role");
+
+					if ((employee.role as any).title === "grabber") {
+						resolve(employee._id);
+					} else {
+						reject(new Error("Employee is not a grabber"));
+					}
 				} else {
 					reject(new Error("Employee not found"));
 				}

@@ -7,12 +7,12 @@ let employeeSchema = new Schema(
 			required: [true, "Employee needs a name"],
 			unique: [true, "Name already exists"],
 		},
-		warehouseID: {
+		warehouse: {
 			type: Types.ObjectId,
 			ref: "Warehouse",
 			required: [true, "Employee needs a Connected Warehouse ID"],
 		},
-		roleID: {
+		role: {
 			type: Types.ObjectId,
 			ref: "Role",
 			required: [true, "Employee needs a Role ID"],

@@ -59,10 +59,10 @@ router.post("/", async (req, res) => {
 		return;
 	}
 
-	let warehouseID;
+	let warehouse;
 
 	try {
-		warehouseID = await getWarehouseIdByName(warehouseName);
+		warehouse = await getWarehouseIdByName(warehouseName);
 	} catch (err) {
 		if (err instanceof Error) {
 			res.status(404).send("Warehouse not found");
@@ -72,10 +72,10 @@ router.post("/", async (req, res) => {
 		return;
 	}
 
-	let roleID;
+	let role;
 
 	try {
-		roleID = await getRoleIDByTitle(roleTitle);
+		role = await getRoleIDByTitle(roleTitle);
 	} catch (err) {
 		if (err instanceof Error) {
 			res.status(404).send("Warehouse not found");
@@ -87,8 +87,8 @@ router.post("/", async (req, res) => {
 
 	let newEmployee: any = {
 		name,
-		warehouseID,
-		roleID,
+		warehouse,
+		role,
 	};
 
 	createEmployee(newEmployee)
