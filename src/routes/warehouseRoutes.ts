@@ -81,7 +81,7 @@ router.put("/:warehouse/products", async (req, res) => {
 	}
 
 	let product: any = {
-		productID,
+		product: productID,
 		quantity,
 		shelfID,
 	};

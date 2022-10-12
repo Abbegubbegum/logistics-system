@@ -75,6 +75,30 @@ export function getGrabberIDByName(name: string) {
 	});
 }
 
+export function getDriverIDByName(name: string) {
+	return new Promise<Types.ObjectId>((resolve, reject) => {
+		employeeModel
+			.findOneByName(name)
+			.then(async (employee) => {
+				if (employee) {
+					await employee.populate("role");
+
+					if ((employee.role as any).title === "driver") {
+						resolve(employee._id);
+					} else {
+						reject(new Error("Employee is not a driver"));
+					}
+				} else {
+					reject(new Error("Employee not found"));
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
 export function createEmployee(newEmployee: IEmployee): Promise<void> {
 	return new Promise<void>((resolve, reject) => {
 		employeeModel

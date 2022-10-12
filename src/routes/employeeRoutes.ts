@@ -59,11 +59,14 @@ router.post("/", async (req, res) => {
 		return;
 	}
 
+	let error;
+
 	let warehouse;
 
 	try {
 		warehouse = await getWarehouseIdByName(warehouseName);
 	} catch (err) {
+		error = true;
 		if (err instanceof Error) {
 			res.status(404).send("Warehouse not found");
 			return;
@@ -71,12 +74,15 @@ router.post("/", async (req, res) => {
 		res.sendStatus(500);
 		return;
 	}
+
+	if (error) return;
 
 	let role;
 
 	try {
 		role = await getRoleIDByTitle(roleTitle);
 	} catch (err) {
+		error = true;
 		if (err instanceof Error) {
 			res.status(404).send("Warehouse not found");
 			return;
@@ -84,6 +90,8 @@ router.post("/", async (req, res) => {
 		res.sendStatus(500);
 		return;
 	}
+
+	if (error) return;
 
 	let newEmployee: any = {
 		name,

@@ -18,13 +18,13 @@ let orderSchema = new Schema({
 		type: Date,
 		default: Date.now,
 	},
-	grabberID: {
+	grabber: {
 		type: Types.ObjectId,
 	},
 	packed_at: {
 		type: Date,
 	},
-	driverID: {
+	driver: {
 		type: Types.ObjectId,
 	},
 	delivered_at: {
