@@ -3,6 +3,10 @@ import {
 	addGrabberToOrder,
 	createOrder,
 	getAllOrders,
+	getAllPackedOrders,
+	getAllUnpackedOrders,
+	getOldestPackedOrder,
+	getOldestUnpackedOrder,
 	getOrderById,
 	setOrderAsDelivered,
 	setOrderAsPacked,
@@ -113,6 +117,54 @@ router.post("/", async (req, res) => {
 		})
 		.catch((err) => {
 			return res.sendStatus(500);
+		});
+});
+
+router.get("/unpacked", (req, res) => {
+	getAllUnpackedOrders()
+		.then((orders) => {
+			res.status(200).json(orders);
+			return;
+		})
+		.catch((err) => {
+			res.sendStatus(500);
+			return;
+		});
+});
+
+router.get("/unpacked/oldest", (req, res) => {
+	getOldestUnpackedOrder()
+		.then((order) => {
+			res.status(200).json(order);
+			return;
+		})
+		.catch((err) => {
+			res.sendStatus(500);
+			return;
+		});
+});
+
+router.get("/packed", (req, res) => {
+	getAllPackedOrders()
+		.then((orders) => {
+			res.status(200).json(orders);
+			return;
+		})
+		.catch((err) => {
+			res.sendStatus(500);
+			return;
+		});
+});
+
+router.get("/packed/oldest", (req, res) => {
+	getOldestPackedOrder()
+		.then((order) => {
+			res.status(200).json(order);
+			return;
+		})
+		.catch((err) => {
+			res.sendStatus(500);
+			return;
 		});
 });
 

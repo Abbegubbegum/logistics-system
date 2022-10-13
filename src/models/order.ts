@@ -20,12 +20,14 @@ let orderSchema = new Schema({
 	},
 	grabber: {
 		type: Types.ObjectId,
+		ref: "Employee",
 	},
 	packed_at: {
 		type: Date,
 	},
 	driver: {
 		type: Types.ObjectId,
+		ref: "Employee",
 	},
 	delivered_at: {
 		type: Date,
