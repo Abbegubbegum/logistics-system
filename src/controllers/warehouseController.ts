@@ -1,4 +1,6 @@
 import { Types } from "mongoose";
+import { IProduct } from "../models/product.js";
+import warehouse from "../models/warehouse.js";
 import warehouseModel, {
 	IWarehouse,
 	IWarehouseProduct,
@@ -46,6 +48,31 @@ export function getWarehouseByName(name: string) {
 				} else {
 					reject(new Error("Warehouse not found"));
 				}
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function getWarehousesWithProduct(productName: string) {
+	return new Promise<IWarehouse[]>((resolve, reject) => {
+		warehouseModel
+			.find()
+			.populate("products.product")
+			.then((warehouses) => {
+				warehouses = warehouses.filter((warehouse) => {
+					warehouse.products = warehouse.products.filter(
+						(product) =>
+							(product.product as IProduct).name.match(
+								productName
+							) !== null
+					) as any;
+					return warehouse.products.length > 0;
+				});
+				
+				resolve(warehouses);
 			})
 			.catch((err) => {
 				console.log(err);

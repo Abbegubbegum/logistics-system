@@ -1,7 +1,21 @@
 import { Router } from "express";
+import { request } from "http";
 import { createProduct } from "../controllers/productController.js";
+import { getWarehousesWithProduct } from "../controllers/warehouseController.js";
 
 const router = Router();
+
+router.get("/:product/stock", async (req, res) => {
+	let productName = req.params.product;
+
+	getWarehousesWithProduct(productName)
+		.then((warehouses) => {
+			res.status(200).json(warehouses);
+		})
+		.catch((err) => {
+			res.sendStatus(500);
+		});
+});
 
 router.post("/", (req, res) => {
 	let name: string = req.body.name;
@@ -21,11 +35,11 @@ router.post("/", (req, res) => {
 	}
 
 	if (typeof weight !== "number" && weight !== undefined) {
-		return res.status(400).send(
-			"Bad request, weight must be a number or undefined"
-		);
+		return res
+			.status(400)
+			.send("Bad request, weight must be a number or undefined");
 	}
- 
+
 	let product: any = {
 		name,
 		price,
