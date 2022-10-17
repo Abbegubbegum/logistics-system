@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import employeeModel, { IEmployee } from "../models/employee.js";
 
 export function getAllEmployees() {
@@ -17,6 +17,24 @@ export function getAllEmployees() {
 
 export function getEmployeeByName(name: string): Promise<IEmployee> {
 	return new Promise<IEmployee>((resolve, reject) => {
+		employeeModel
+			.findOne({ name: name })
+			.then((employee) => {
+				if (employee) {
+					resolve(employee);
+				} else {
+					reject(new Error("Employee not found"));
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				reject(err);
+			});
+	});
+}
+
+export function getEmployeeDocByName(name: string) {
+	return new Promise<HydratedDocument<IEmployee>>((resolve, reject) => {
 		employeeModel
 			.findOne({ name: name })
 			.then((employee) => {

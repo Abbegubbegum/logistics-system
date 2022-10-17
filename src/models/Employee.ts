@@ -17,6 +17,15 @@ let employeeSchema = new Schema(
 			ref: "Role",
 			required: [true, "Employee needs a Role ID"],
 		},
+		schedule: {
+			sun: { type: Array<Boolean>, default: createEmptySchedule },
+			mon: { type: Array<Boolean>, default: createEmptySchedule },
+			tue: { type: Array<Boolean>, default: createEmptySchedule },
+			wed: { type: Array<Boolean>, default: createEmptySchedule },
+			thu: { type: Array<Boolean>, default: createEmptySchedule },
+			fri: { type: Array<Boolean>, default: createEmptySchedule },
+			sat: { type: Array<Boolean>, default: createEmptySchedule },
+		},
 	},
 	{
 		statics: {
@@ -26,6 +35,18 @@ let employeeSchema = new Schema(
 		},
 	}
 );
+
+function createEmptySchedule() {
+	let schedule = [];
+	let timestep = 30;
+	let sections = 1440 / timestep;
+
+	for (let i = 0; i < sections; i++) {
+		schedule[i] = false;
+	}
+
+	return schedule;
+}
 
 export type IEmployee = InferSchemaType<typeof employeeSchema>;
 
