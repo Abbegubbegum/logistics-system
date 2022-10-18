@@ -5,6 +5,7 @@ import {
 	getAllEmployees,
 	getEmployeeByName,
 	getEmployeeDocByName,
+	getEmployeesWorkingOnDay,
 } from "../controllers/employeeController.js";
 import { Router } from "express";
 import { getWarehouseIdByName } from "../controllers/warehouseController.js";
@@ -12,11 +13,53 @@ import { getRoleIDByTitle } from "../controllers/roleController.js";
 import { HydratedDocument } from "mongoose";
 import { IEmployee, createEmptySchedule } from "../models/employee.js";
 import { resolve } from "path";
+import { request } from "http";
 
 const router = Router();
 
 router.get("/", (req, res) => {
 	getAllEmployees()
+		.then((employees) => {
+			res.status(200).json(employees);
+			return;
+		})
+		.catch((err) => {
+			res.sendStatus(500);
+			return;
+		});
+});
+
+router.get("/today", (req, res) => {
+	let key;
+
+	switch (new Date().getDay()) {
+		case 0:
+			key = "sun";
+			break;
+		case 1:
+			key = "mon";
+			break;
+		case 2:
+			key = "tue";
+			break;
+		case 3:
+			key = "wed";
+			break;
+		case 4:
+			key = "thu";
+			break;
+		case 5:
+			key = "fri";
+			break;
+		case 6:
+			key = "sat";
+			break;
+		default:
+			res.sendStatus(500);
+			return;
+	}
+
+	getEmployeesWorkingOnDay(key)
 		.then((employees) => {
 			res.status(200).json(employees);
 			return;

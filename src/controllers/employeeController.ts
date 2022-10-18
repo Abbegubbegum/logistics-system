@@ -15,6 +15,20 @@ export function getAllEmployees() {
 	});
 }
 
+export function getEmployeesWorkingOnDay(key: string): Promise<IEmployee[]> {
+	return new Promise<IEmployee[]>((resolve, reject) => {
+		employeeModel
+			.find({ [`schedule.${key}`]: true })
+			.then((employees) => {
+				resolve(employees);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
 export function getEmployeeByName(name: string): Promise<IEmployee> {
 	return new Promise<IEmployee>((resolve, reject) => {
 		employeeModel
