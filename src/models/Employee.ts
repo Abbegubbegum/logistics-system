@@ -36,7 +36,7 @@ let employeeSchema = new Schema(
 	}
 );
 
-function createEmptySchedule() {
+export function createEmptySchedule() {
 	let schedule = [];
 	let timestep = 30;
 	let sections = 1440 / timestep;

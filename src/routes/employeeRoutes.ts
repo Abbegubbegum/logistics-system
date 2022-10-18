@@ -9,9 +9,9 @@ import {
 import { Router } from "express";
 import { getWarehouseIdByName } from "../controllers/warehouseController.js";
 import { getRoleIDByTitle } from "../controllers/roleController.js";
-import { request } from "http";
 import { HydratedDocument } from "mongoose";
-import { IEmployee } from "../models/employee.js";
+import { IEmployee, createEmptySchedule } from "../models/employee.js";
+import { resolve } from "path";
 
 const router = Router();
 
@@ -151,7 +151,21 @@ router.post("/:name/schedule", async (req, res) => {
 
 	let parsedSchedule = parseScheduleEntries(Object.entries(schedule));
 
-	console.log(parsedSchedule);
+	let arrayParsedSchedule = createArraySchedule(parsedSchedule);
+
+	arrayParsedSchedule.forEach((day) => {
+		(employee.schedule as any)[day.key] = day.value;
+	});
+
+	employee
+		.save()
+		.then(() => {
+			res.sendStatus(201);
+		})
+		.catch((err) => {
+			console.log(err);
+			res.sendStatus(500);
+		});
 });
 
 function parseScheduleEntries(entries: [string, any][]) {
@@ -200,6 +214,28 @@ function parseScheduleEntries(entries: [string, any][]) {
 	}
 
 	return parsed;
+}
+
+function createArraySchedule(parsedSchedule: any) {
+	let arraySchedule: any[] = [];
+	parsedSchedule.forEach((day: any) => {
+		let array = createEmptySchedule();
+
+		let startIndex = day.startHour * 2 + day.startMinute / 30;
+		let endIndex = day.endHour * 2 + day.endMinute / 30;
+
+		for (
+			let i = Math.min(startIndex, endIndex);
+			i < Math.max(startIndex, endIndex);
+			i++
+		) {
+			array[i] = true;
+		}
+
+		arraySchedule.push({ key: day.key, value: array });
+	});
+
+	return arraySchedule;
 }
 
 router.delete("/", (req, res) => {
