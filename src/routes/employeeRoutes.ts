@@ -12,21 +12,45 @@ import { getWarehouseIdByName } from "../controllers/warehouseController.js";
 import { getRoleIDByTitle } from "../controllers/roleController.js";
 import { HydratedDocument } from "mongoose";
 import { IEmployee, createEmptySchedule } from "../models/employee.js";
-import { resolve } from "path";
-import { request } from "http";
 
 const router = Router();
 
 router.get("/", (req, res) => {
-	getAllEmployees()
-		.then((employees) => {
-			res.status(200).json(employees);
-			return;
-		})
-		.catch((err) => {
-			res.sendStatus(500);
-			return;
-		});
+	let day = req.query.day;
+
+	if (typeof day === "string") {
+		if (["mon", "tue", "wed", "thu", "fri", "sat", "sun"].includes(day)) {
+			getEmployeesWorkingOnDay(day)
+				.then((employees) => {
+					res.status(200).json(employees);
+					return;
+				})
+				.catch((err) => {
+					res.sendStatus(500);
+					return;
+				});
+		} else {
+			getAllEmployees()
+				.then((employees) => {
+					res.status(200).json(employees);
+					return;
+				})
+				.catch((err) => {
+					res.sendStatus(500);
+					return;
+				});
+		}
+	} else {
+		getAllEmployees()
+			.then((employees) => {
+				res.status(200).json(employees);
+				return;
+			})
+			.catch((err) => {
+				res.sendStatus(500);
+				return;
+			});
+	}
 });
 
 router.get("/today", (req, res) => {
