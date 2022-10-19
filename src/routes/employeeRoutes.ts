@@ -5,13 +5,16 @@ import {
 	getAllEmployees,
 	getEmployeeByName,
 	getEmployeeDocByName,
+	getEmployeesWorkingATimestep,
 	getEmployeesWorkingOnDay,
+	getGrabbersWorkingATimestep,
 } from "../controllers/employeeController.js";
 import { Router } from "express";
 import { getWarehouseIdByName } from "../controllers/warehouseController.js";
 import { getRoleIDByTitle } from "../controllers/roleController.js";
 import { HydratedDocument } from "mongoose";
 import { IEmployee, createEmptySchedule } from "../models/employee.js";
+import { request } from "http";
 
 const router = Router();
 
@@ -94,6 +97,48 @@ router.get("/today", (req, res) => {
 		});
 });
 
+router.get("/available", (req, res) => {
+	let now = new Date();
+	let key;
+
+	let index = now.getHours() * 2 + Math.floor(now.getMinutes() / 30);
+
+	switch (now.getDay()) {
+		case 0:
+			key = "sun";
+			break;
+		case 1:
+			key = "mon";
+			break;
+		case 2:
+			key = "tue";
+			break;
+		case 3:
+			key = "wed";
+			break;
+		case 4:
+			key = "thu";
+			break;
+		case 5:
+			key = "fri";
+			break;
+		case 6:
+			key = "sat";
+			break;
+		default:
+			res.sendStatus(500);
+			return;
+	}
+
+	getEmployeesWorkingATimestep(key, index)
+		.then((employees) => {
+			res.status(200).json(employees);
+		})
+		.catch((err) => {
+			res.sendStatus(500);
+		});
+});
+
 router.get("/:name", (req, res) => {
 	let name = req.params.name;
 
@@ -109,6 +154,48 @@ router.get("/:name", (req, res) => {
 				res.sendStatus(500);
 				return;
 			}
+		});
+});
+
+router.get("/grabbers/available", (req, res) => {
+	let now = new Date();
+	let key;
+
+	let index = now.getHours() * 2 + Math.floor(now.getMinutes() / 30);
+
+	switch (now.getDay()) {
+		case 0:
+			key = "sun";
+			break;
+		case 1:
+			key = "mon";
+			break;
+		case 2:
+			key = "tue";
+			break;
+		case 3:
+			key = "wed";
+			break;
+		case 4:
+			key = "thu";
+			break;
+		case 5:
+			key = "fri";
+			break;
+		case 6:
+			key = "sat";
+			break;
+		default:
+			res.sendStatus(500);
+			return;
+	}
+
+	getGrabbersWorkingATimestep(key, index)
+		.then((employees) => {
+			res.status(200).json(employees);
+		})
+		.catch((err) => {
+			res.sendStatus(500);
 		});
 });
 

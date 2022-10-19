@@ -29,6 +29,45 @@ export function getEmployeesWorkingOnDay(key: string): Promise<IEmployee[]> {
 	});
 }
 
+export function getEmployeesWorkingATimestep(
+	dayKey: string,
+	timestepIndex: number
+) {
+	return new Promise<IEmployee[]>((resolve, reject) => {
+		employeeModel
+			.find({ [`schedule.${dayKey}.${timestepIndex}`]: true })
+			.then((employees) => {
+				resolve(employees);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function getGrabbersWorkingATimestep(
+	dayKey: string,
+	timestepIndex: number
+) {
+	return new Promise<IEmployee[]>((resolve, reject) => {
+		employeeModel
+			.find({ [`schedule.${dayKey}.${timestepIndex}`]: true })
+			.populate("role")
+			.then((employees) => {
+				resolve(
+					employees.filter(
+						(employee) => (employee.role as any).title === "grabber"
+					)
+				);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
 export function getEmployeeByName(name: string): Promise<IEmployee> {
 	return new Promise<IEmployee>((resolve, reject) => {
 		employeeModel

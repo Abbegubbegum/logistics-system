@@ -111,6 +111,51 @@ export function getOrderById(id: string) {
 	});
 }
 
+export function getOrderPriceByID(id: string) {
+	return new Promise<number>((resolve, reject) => {
+		orderModel
+			.findById(id, { products: 1 })
+			.populate("products.product")
+			.then((order) => {
+				if (order) {
+					let price = 0;
+
+					order.products.forEach((product) => {
+						price +=
+							(product.product as any).price * product.quantity;
+					});
+					resolve(price);
+				} else {
+					reject(new Error("Order not found"));
+				}
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function getOrdersFromMonth(month: number) {
+	return new Promise<IOrder[]>((resolve, reject) => {
+		var firstDay = new Date(new Date().getFullYear(), month - 1, 1);
+		var lastDay = new Date(new Date().getFullYear(), month, 1);
+
+		console.log(firstDay);
+		console.log(lastDay);
+
+		orderModel
+			.find({ created_at: { $gte: firstDay, $lte: lastDay } })
+			.then((orders) => {
+				resolve(orders);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
 export function addGrabberToOrder(id: string, grabberID: Types.ObjectId) {
 	return new Promise<void>((resolve, reject) => {
 		orderModel

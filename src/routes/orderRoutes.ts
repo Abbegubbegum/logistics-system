@@ -8,29 +8,58 @@ import {
 	getOldestPackedOrder,
 	getOldestUnpackedOrder,
 	getOrderById,
+	getOrderPriceByID,
+	getOrdersFromMonth,
 	setOrderAsDelivered,
 	setOrderAsPacked,
 } from "../controllers/orderController.js";
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { getProductIDByName } from "../controllers/productController.js";
 import { isValidObjectId, Types } from "mongoose";
 import {
 	getDriverIDByName,
 	getGrabberIDByName,
 } from "../controllers/employeeController.js";
+import { request } from "http";
 
 const router = Router();
 
 router.get("/", (req, res) => {
-	getAllOrders()
-		.then((orders) => {
-			res.status(200).json(orders);
-			return;
-		})
-		.catch((err) => {
-			res.sendStatus(500);
-			return;
-		});
+	if (typeof req.query.month === "string") {
+		let month = parseInt(req.query.month);
+
+		if (month > 0 && month <= 12) {
+			getOrdersFromMonth(month)
+				.then((orders) => {
+					res.status(200).json(orders);
+					return;
+				})
+				.catch((err) => {
+					res.sendStatus(500);
+					return;
+				});
+		} else {
+			getAllOrders()
+				.then((orders) => {
+					res.status(200).json(orders);
+					return;
+				})
+				.catch((err) => {
+					res.sendStatus(500);
+					return;
+				});
+		}
+	} else {
+		getAllOrders()
+			.then((orders) => {
+				res.status(200).json(orders);
+				return;
+			})
+			.catch((err) => {
+				res.sendStatus(500);
+				return;
+			});
+	}
 });
 
 router.post("/", async (req, res) => {
@@ -168,34 +197,32 @@ router.get("/packed/oldest", (req, res) => {
 		});
 });
 
-router.put("/:orderID/grabber", async (req, res) => {
+router.get("/:orderID/price", (req, res) => {
 	let orderID = req.params.orderID;
-	let grabberName = req.body.name;
 
 	if (!isValidObjectId(orderID)) {
 		return res.status(400).send("Bad Request, invalid order ID");
 	}
+
+	getOrderPriceByID(orderID)
+		.then((price) => {
+			res.status(200).json({ price });
+		})
+		.catch((err) => {
+			res.sendStatus(500);
+		});
+});
+
+router.put("/:orderID/grabber", orderIDParsing, async (req, res) => {
+	let orderID = req.params.orderID;
+	let grabberName = req.body.name;
+	let order = (req as any).order;
 
 	if (typeof grabberName !== "string") {
 		return res.status(400).send("Bad Request, invalid name");
 	}
 
 	let error = false;
-
-	let order;
-
-	try {
-		order = await getOrderById(orderID);
-	} catch (err) {
-		error = true;
-		if (err instanceof Error) {
-			return res.status(404).send("Order not found");
-		} else {
-			return res.sendStatus(500);
-		}
-	}
-
-	if (error) return;
 
 	if (order.grabber) {
 		return res.status(400).send("Order already has a grabber asigned");
@@ -237,29 +264,9 @@ router.put("/:orderID/grabber", async (req, res) => {
 		});
 });
 
-router.put("/:orderID/packed", async (req, res) => {
+router.put("/:orderID/packed", orderIDParsing, async (req, res) => {
 	let orderID = req.params.orderID;
-
-	if (!isValidObjectId(orderID)) {
-		return res.status(400).send("Bad Request, invalid order ID");
-	}
-
-	let error = false;
-
-	let order;
-
-	try {
-		order = await getOrderById(orderID);
-	} catch (err) {
-		error = true;
-		if (err instanceof Error) {
-			return res.status(404).send("Order not found");
-		} else {
-			return res.sendStatus(500);
-		}
-	}
-
-	if (error) return;
+	let order = (req as any).order;
 
 	if (!order.grabber) {
 		return res.status(400).send("Order doesn't have a grabber asigned");
@@ -282,34 +289,16 @@ router.put("/:orderID/packed", async (req, res) => {
 		});
 });
 
-router.put("/:orderID/driver", async (req, res) => {
+router.put("/:orderID/driver", orderIDParsing, async (req, res) => {
 	let orderID = req.params.orderID;
 	let driverName = req.body.name;
-
-	if (!isValidObjectId(orderID)) {
-		return res.status(400).send("Bad Request, invalid order ID");
-	}
+	let order = (req as any).order;
 
 	if (typeof driverName !== "string") {
 		return res.status(400).send("Bad Request, invalid name");
 	}
 
 	let error = false;
-
-	let order;
-
-	try {
-		order = await getOrderById(orderID);
-	} catch (err) {
-		error = true;
-		if (err instanceof Error) {
-			return res.status(404).send("Order not found");
-		} else {
-			return res.sendStatus(500);
-		}
-	}
-
-	if (error) return;
 
 	if (order.driver) {
 		return res.status(400).send("Order already has a driver asigned");
@@ -351,7 +340,32 @@ router.put("/:orderID/driver", async (req, res) => {
 		});
 });
 
-router.put("/:orderID/delivered", async (req, res) => {
+router.put("/:orderID/delivered", orderIDParsing, async (req, res) => {
+	let orderID = req.params.orderID;
+	let order = (req as any).order;
+
+	if (!order.driver) {
+		return res.status(400).send("Order doesn't have a driver asigned");
+	}
+
+	if (order.delivered_at) {
+		return res.status(400).send("Order is already delivered");
+	}
+
+	setOrderAsDelivered(orderID)
+		.then(() => {
+			return res.sendStatus(200);
+		})
+		.catch((err: Error) => {
+			if (err.message === "Order not found") {
+				return res.status(404).send("Order not found");
+			} else {
+				return res.sendStatus(500);
+			}
+		});
+});
+
+async function orderIDParsing(req: Request, res: Response, next: NextFunction) {
 	let orderID = req.params.orderID;
 
 	if (!isValidObjectId(orderID)) {
@@ -375,25 +389,9 @@ router.put("/:orderID/delivered", async (req, res) => {
 
 	if (error) return;
 
-	if (!order.driver) {
-		return res.status(400).send("Order doesn't have a driver asigned");
-	}
+	(req as any).order = order;
 
-	if (order.delivered_at) {
-		return res.status(400).send("Order is already delivered");
-	}
-
-	setOrderAsDelivered(orderID)
-		.then(() => {
-			return res.sendStatus(200);
-		})
-		.catch((err: Error) => {
-			if (err.message === "Order not found") {
-				return res.status(404).send("Order not found");
-			} else {
-				return res.sendStatus(500);
-			}
-		});
-});
+	next();
+}
 
 export default router;
