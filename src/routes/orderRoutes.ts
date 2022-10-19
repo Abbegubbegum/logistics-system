@@ -5,17 +5,20 @@ import {
 	getAllOrders,
 	getAllPackedOrders,
 	getAllUnpackedOrders,
+	getMostExpensiveOrder,
+	getMostExpensiveOrderFromMonth,
 	getOldestPackedOrder,
 	getOldestUnpackedOrder,
 	getOrderById,
-	getOrderPriceByID,
+	getSumOfOrderCostsFromMonth,
 	getOrdersFromMonth,
 	setOrderAsDelivered,
 	setOrderAsPacked,
+	getSumOfAllOrderCosts,
 } from "../controllers/orderController.js";
 import { Router, Request, Response, NextFunction } from "express";
-import { getProductIDByName } from "../controllers/productController.js";
-import { isValidObjectId, Types } from "mongoose";
+import { getProductByName } from "../controllers/productController.js";
+import { isValidObjectId } from "mongoose";
 import {
 	getDriverIDByName,
 	getGrabberIDByName,
@@ -29,9 +32,55 @@ router.get("/", (req, res) => {
 		let month = parseInt(req.query.month);
 
 		if (month > 0 && month <= 12) {
-			getOrdersFromMonth(month)
-				.then((orders) => {
-					res.status(200).json(orders);
+			if (req.query.sum) {
+				getSumOfOrderCostsFromMonth(month)
+					.then((cost) => {
+						res.status(200).json({ cost });
+						return;
+					})
+					.catch((err) => {
+						res.sendStatus(500);
+						return;
+					});
+			} else {
+				getOrdersFromMonth(month)
+					.then((orders) => {
+						res.status(200).json(orders);
+						return;
+					})
+					.catch((err) => {
+						res.sendStatus(500);
+						return;
+					});
+			}
+		} else {
+			if (req.query.sum) {
+				getSumOfAllOrderCosts()
+					.then((cost) => {
+						res.status(200).json({ cost });
+						return;
+					})
+					.catch((err) => {
+						res.sendStatus(500);
+						return;
+					});
+			} else {
+				getAllOrders()
+					.then((orders) => {
+						res.status(200).json(orders);
+						return;
+					})
+					.catch((err) => {
+						res.sendStatus(500);
+						return;
+					});
+			}
+		}
+	} else {
+		if (req.query.sum) {
+			getSumOfAllOrderCosts()
+				.then((cost) => {
+					res.status(200).json({ cost });
 					return;
 				})
 				.catch((err) => {
@@ -49,16 +98,6 @@ router.get("/", (req, res) => {
 					return;
 				});
 		}
-	} else {
-		getAllOrders()
-			.then((orders) => {
-				res.status(200).json(orders);
-				return;
-			})
-			.catch((err) => {
-				res.sendStatus(500);
-				return;
-			});
 	}
 });
 
@@ -110,14 +149,18 @@ router.post("/", async (req, res) => {
 
 	let products: any[] = [];
 
+	let cost = 0;
+
 	for (let i = 0; i < productsWithNames.length; i++) {
 		let product = productsWithNames[i];
-		await getProductIDByName(product.name)
-			.then((productID) => {
+		await getProductByName(product.name)
+			.then((productDoc) => {
 				products.push({
-					product: productID,
+					product: productDoc._id,
 					quantity: product.quantity,
 				});
+
+				cost += productDoc.price * product.quantity;
 			})
 			.catch((err: Error) => {
 				if (err.message === "Product not found") {
@@ -138,15 +181,54 @@ router.post("/", async (req, res) => {
 
 	let order: any = {
 		products,
+		cost,
 	};
 
 	createOrder(order)
 		.then(() => {
-			return res.sendStatus(201);
+			return res.status(201).json({ cost });
 		})
 		.catch((err) => {
 			return res.sendStatus(500);
 		});
+});
+
+router.get("/mostexpensive", (req, res) => {
+	if (typeof req.query.month === "string") {
+		let month = parseInt(req.query.month);
+
+		if (month > 0 && month <= 12) {
+			getMostExpensiveOrderFromMonth(month)
+				.then((order) => {
+					res.status(200).json(order);
+					return;
+				})
+				.catch((err) => {
+					res.sendStatus(500);
+					return;
+				});
+		} else {
+			getMostExpensiveOrder()
+				.then((order) => {
+					res.status(200).json(order);
+					return;
+				})
+				.catch((err) => {
+					res.sendStatus(500);
+					return;
+				});
+		}
+	} else {
+		getMostExpensiveOrder()
+			.then((order) => {
+				res.status(200).json(order);
+				return;
+			})
+			.catch((err) => {
+				res.sendStatus(500);
+				return;
+			});
+	}
 });
 
 router.get("/unpacked", (req, res) => {
@@ -194,22 +276,6 @@ router.get("/packed/oldest", (req, res) => {
 		.catch((err) => {
 			res.sendStatus(500);
 			return;
-		});
-});
-
-router.get("/:orderID/price", (req, res) => {
-	let orderID = req.params.orderID;
-
-	if (!isValidObjectId(orderID)) {
-		return res.status(400).send("Bad Request, invalid order ID");
-	}
-
-	getOrderPriceByID(orderID)
-		.then((price) => {
-			res.status(200).json({ price });
-		})
-		.catch((err) => {
-			res.sendStatus(500);
 		});
 });
 

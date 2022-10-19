@@ -14,6 +14,10 @@ let orderProductSchema = new Schema({
 
 let orderSchema = new Schema({
 	products: [orderProductSchema],
+	cost: {
+		type: Number,
+		required: [true, "Order Product needs a cost"],
+	},
 	created_at: {
 		type: Date,
 		default: Date.now,

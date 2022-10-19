@@ -1,5 +1,6 @@
 import { HydratedDocument, Types } from "mongoose";
 import orderModel, { IOrder } from "../models/order.js";
+import product from "../models/product.js";
 
 export function getAllOrders() {
 	return new Promise<IOrder[]>((resolve, reject) => {
@@ -7,6 +8,20 @@ export function getAllOrders() {
 			.find()
 			.then((orders) => {
 				resolve(orders);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function getSumOfAllOrderCosts() {
+	return new Promise<number>((resolve, reject) => {
+		orderModel
+			.aggregate([{ $group: { _id: null, sum: { $sum: "$cost" } } }])
+			.then((result) => {
+				resolve(result[0].sum);
 			})
 			.catch((err) => {
 				console.log(err);
@@ -111,23 +126,16 @@ export function getOrderById(id: string) {
 	});
 }
 
-export function getOrderPriceByID(id: string) {
-	return new Promise<number>((resolve, reject) => {
-		orderModel
-			.findById(id, { products: 1 })
-			.populate("products.product")
-			.then((order) => {
-				if (order) {
-					let price = 0;
+export function getOrdersFromMonth(month: number) {
+	return new Promise<IOrder[]>((resolve, reject) => {
+		let year = new Date().getFullYear();
+		var firstDay = new Date(year, month - 1, 1);
+		var lastDay = new Date(year, month, 1);
 
-					order.products.forEach((product) => {
-						price +=
-							(product.product as any).price * product.quantity;
-					});
-					resolve(price);
-				} else {
-					reject(new Error("Order not found"));
-				}
+		orderModel
+			.find({ created_at: { $gte: firstDay, $lte: lastDay } })
+			.then((orders) => {
+				resolve(orders);
 			})
 			.catch((err) => {
 				console.log(err);
@@ -136,18 +144,55 @@ export function getOrderPriceByID(id: string) {
 	});
 }
 
-export function getOrdersFromMonth(month: number) {
-	return new Promise<IOrder[]>((resolve, reject) => {
-		var firstDay = new Date(new Date().getFullYear(), month - 1, 1);
-		var lastDay = new Date(new Date().getFullYear(), month, 1);
+export function getSumOfOrderCostsFromMonth(month: number) {
+	return new Promise<number>((resolve, reject) => {
+		let year = new Date().getFullYear();
+		let firstDay = new Date(year, month - 1, 1);
+		let lastDay = new Date(year, month, 1);
 
-		console.log(firstDay);
-		console.log(lastDay);
+		orderModel
+			.aggregate([
+				{ $match: { created_at: { $gte: firstDay, $lte: lastDay } } },
+				{ $group: { _id: null, sum: { $sum: "$cost" } } },
+			])
+			.then((result) => {
+				resolve(result[0].sum);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function getMostExpensiveOrder() {
+	return new Promise((resolve, reject) => {
+		orderModel
+			.find()
+			.sort({ cost: "desc" })
+			.limit(1)
+			.then((order) => {
+				resolve(order);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function getMostExpensiveOrderFromMonth(month: number) {
+	return new Promise((resolve, reject) => {
+		let year = new Date().getFullYear();
+		let firstDay = new Date(year, month - 1, 1);
+		let lastDay = new Date(year, month, 1);
 
 		orderModel
 			.find({ created_at: { $gte: firstDay, $lte: lastDay } })
-			.then((orders) => {
-				resolve(orders);
+			.sort({ cost: "desc" })
+			.limit(1)
+			.then((order) => {
+				resolve(order);
 			})
 			.catch((err) => {
 				console.log(err);
