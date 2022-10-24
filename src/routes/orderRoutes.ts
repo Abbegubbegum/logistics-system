@@ -15,6 +15,7 @@ import {
 	setOrderAsDelivered,
 	setOrderAsPacked,
 	getSumOfAllOrderCosts,
+	getAllOrderDocs,
 } from "../controllers/orderController.js";
 import { Router, Request, Response, NextFunction } from "express";
 import { getProductByName } from "../controllers/productController.js";
@@ -24,6 +25,7 @@ import {
 	getGrabberIDByName,
 } from "../controllers/employeeController.js";
 import { request } from "http";
+import { resolve } from "path";
 
 const router = Router();
 
@@ -190,6 +192,37 @@ router.post("/", async (req, res) => {
 		})
 		.catch((err) => {
 			return res.sendStatus(500);
+		});
+});
+
+router.get("/list", (req, res) => {
+	getAllOrderDocs()
+		.then((orders) => {
+			let orderList: any[] = [];
+
+			orders.forEach((order) => {
+				let status = "UNDEFINED";
+
+				if (order.delivered_at) {
+					status = "DELIVERED";
+				} else if (order.driver) {
+					status = "SHIPPED";
+				} else if (order.packed_at) {
+					status = "AWAITING_SHIPMENT";
+				} else if (order.grabber) {
+					status = "PACKING";
+				} else if (order.created_at) {
+					status = "AWAITING_FULFILLMENT";
+				}
+				orderList.push({ id: order._id, status });
+			});
+
+			res.status(200).json(orderList);
+			return;
+		})
+		.catch((err) => {
+			res.sendStatus(500);
+			return;
 		});
 });
 

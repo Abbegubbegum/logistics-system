@@ -15,6 +15,7 @@ import { getRoleIDByTitle } from "../controllers/roleController.js";
 import { HydratedDocument } from "mongoose";
 import { IEmployee, createEmptySchedule } from "../models/employee.js";
 import { request } from "http";
+import { getEmployeeOrdersByName } from "../controllers/orderController.js";
 
 const router = Router();
 
@@ -154,6 +155,18 @@ router.get("/:name", (req, res) => {
 				res.sendStatus(500);
 				return;
 			}
+		});
+});
+
+router.get("/:name/orders", (req, res) => {
+	let name = req.params.name;
+
+	getEmployeeOrdersByName(name)
+		.then((orders) => {
+			res.status(200).json(orders);
+		})
+		.catch((err) => {
+			res.sendStatus(500);
 		});
 });
 

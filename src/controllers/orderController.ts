@@ -16,6 +16,20 @@ export function getAllOrders() {
 	});
 }
 
+export function getAllOrderDocs() {
+	return new Promise<HydratedDocument<IOrder>[]>((resolve, reject) => {
+		orderModel
+			.find()
+			.then((orders) => {
+				resolve(orders);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
 export function getSumOfAllOrderCosts() {
 	return new Promise<number>((resolve, reject) => {
 		orderModel
@@ -193,6 +207,28 @@ export function getMostExpensiveOrderFromMonth(month: number) {
 			.limit(1)
 			.then((order) => {
 				resolve(order);
+			})
+			.catch((err) => {
+				console.log(err);
+				reject();
+			});
+	});
+}
+
+export function getEmployeeOrdersByName(name: string) {
+	return new Promise((resolve, reject) => {
+		orderModel
+			.find()
+			.populate("driver")
+			.populate("grabber")
+			.then((orders) => {
+				resolve(
+					orders.filter(
+						(order) =>
+							(order.grabber as any).name === name ||
+							(order.driver as any).name === name
+					)
+				);
 			})
 			.catch((err) => {
 				console.log(err);
