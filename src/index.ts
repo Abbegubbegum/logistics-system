@@ -4,6 +4,11 @@ import employeeRoutes from "./routes/employeeRoutes.js";
 import warehouseRoutes from "./routes/warehouseRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+let dbURL = process.env.DB_URL || "mongodb://localhost/logistics";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -19,6 +24,8 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-	mongoose.connect("mongodb://localhost/logistics");
+	mongoose.connect(dbURL).then(() => {
+		console.log("Connected to database");
+	});
 	console.log("Listening on http://localhost:" + port);
 });
