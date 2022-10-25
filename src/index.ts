@@ -6,7 +6,6 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import dotenv from "dotenv";
 import { getEmployeeByName } from "./controllers/employeeController.js";
-import { request } from "http";
 import cors from "cors";
 
 dotenv.config();
