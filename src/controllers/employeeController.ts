@@ -72,6 +72,8 @@ export function getEmployeeByName(name: string): Promise<IEmployee> {
 	return new Promise<IEmployee>((resolve, reject) => {
 		employeeModel
 			.findOne({ name: name })
+			.populate("role")
+			.populate("warehouse")
 			.then((employee) => {
 				if (employee) {
 					resolve(employee);
