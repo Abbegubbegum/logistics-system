@@ -5,6 +5,8 @@ import warehouseRoutes from "./routes/warehouseRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import dotenv from "dotenv";
+import { getEmployeeByName } from "./controllers/employeeController.js";
+import { request } from "http";
 
 dotenv.config();
 
@@ -21,6 +23,27 @@ app.use("/orders", orderRoutes);
 
 app.get("/", (req, res) => {
 	res.sendStatus(200);
+});
+
+app.post("/login", (req, res) => {
+	let name = req.body.name;
+
+	if (typeof name !== "string") {
+		res.status(400).send("Bad request, name must be a string");
+	}
+
+	getEmployeeByName(name)
+		.then((employee) => {
+			console.log(employee);
+			res.status(200).json(employee);
+		})
+		.catch((err: Error) => {
+			if (err.message === "Employee not found") {
+				res.sendStatus(401);
+			} else {
+				res.sendStatus(500);
+			}
+		});
 });
 
 app.listen(port, () => {
