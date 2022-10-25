@@ -31,6 +31,7 @@ app.post("/login", (req, res) => {
 
 	if (typeof name !== "string") {
 		res.status(400).send("Bad request, name must be a string");
+		return;
 	}
 
 	getEmployeeByName(name)
