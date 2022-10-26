@@ -14,7 +14,6 @@ import { getWarehouseIdByName } from "../controllers/warehouseController.js";
 import { getRoleIDByTitle } from "../controllers/roleController.js";
 import { HydratedDocument } from "mongoose";
 import { IEmployee, createEmptySchedule } from "../models/employee.js";
-import { request } from "http";
 import { getEmployeeOrdersByName } from "../controllers/orderController.js";
 
 const router = Router();

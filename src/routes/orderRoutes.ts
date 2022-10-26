@@ -24,8 +24,6 @@ import {
 	getDriverIDByName,
 	getGrabberIDByName,
 } from "../controllers/employeeController.js";
-import { request } from "http";
-import { resolve } from "path";
 
 const router = Router();
 

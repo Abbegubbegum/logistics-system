@@ -1,6 +1,5 @@
 import { Types } from "mongoose";
 import { IProduct } from "../models/product.js";
-import warehouse from "../models/warehouse.js";
 import warehouseModel, {
 	IWarehouse,
 	IWarehouseProduct,
@@ -71,7 +70,7 @@ export function getWarehousesWithProduct(productName: string) {
 					) as any;
 					return warehouse.products.length > 0;
 				});
-				
+
 				resolve(warehouses);
 			})
 			.catch((err) => {

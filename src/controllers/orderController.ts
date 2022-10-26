@@ -1,6 +1,5 @@
 import { HydratedDocument, Types } from "mongoose";
 import orderModel, { IOrder } from "../models/order.js";
-import product from "../models/product.js";
 
 export function getAllOrders() {
 	return new Promise<IOrder[]>((resolve, reject) => {

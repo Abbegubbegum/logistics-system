@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { request } from "http";
 import { createProduct } from "../controllers/productController.js";
 import { getWarehousesWithProduct } from "../controllers/warehouseController.js";
 

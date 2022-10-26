@@ -5,10 +5,7 @@ import {
 	getAllWarehouses,
 	getWarehouseByName,
 } from "../controllers/warehouseController.js";
-import { Types } from "mongoose";
 import { getProductIDByName } from "../controllers/productController.js";
-import { request } from "http";
-import { IWarehouse } from "../models/warehouse.js";
 
 const router = Router();
 
