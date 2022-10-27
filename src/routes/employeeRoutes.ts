@@ -254,7 +254,7 @@ router.post("/", async (req, res) => {
 	} catch (err) {
 		error = true;
 		if (err instanceof Error) {
-			res.status(404).send("Warehouse not found");
+			res.status(404).send("Role not found");
 			return;
 		}
 		res.sendStatus(500);
@@ -270,16 +270,18 @@ router.post("/", async (req, res) => {
 	};
 
 	createEmployee(newEmployee)
-		.then(() => {
-			res.sendStatus(201);
+		.then((employee) => {
+			res.status(201).send(employee);
 			return;
 		})
 		.catch((err) => {
 			if (err.message === "Duplicate employee") {
 				res.status(400).send("Employee with name already exists");
+				return;
+			} else {
+				res.sendStatus(500);
+				return;
 			}
-			res.sendStatus(500);
-			return;
 		});
 });
 

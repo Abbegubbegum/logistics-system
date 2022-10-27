@@ -172,12 +172,13 @@ export function getDriverIDByName(name: string) {
 	});
 }
 
-export function createEmployee(newEmployee: IEmployee): Promise<void> {
-	return new Promise<void>((resolve, reject) => {
+export function createEmployee(newEmployee: IEmployee) {
+	return new Promise<IEmployee>((resolve, reject) => {
 		employeeModel
 			.create(newEmployee)
-			.then(() => {
-				resolve();
+			.then(async (employee) => {
+				await employee.populate("role");
+				resolve(employee);
 			})
 			.catch((err) => {
 				if (err.code === 11000) {
