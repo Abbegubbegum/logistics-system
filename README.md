@@ -28,7 +28,7 @@ The documentation on the available endpoints for the REST API.
 
 ### Request
 
-`POST /employees/`
+`POST /employees`
 
 Body
 
@@ -51,7 +51,7 @@ Body
 The response is the newly created employee object
 
 ```json
-201
+201 Created
 
 {
   "name": "John Doe",
@@ -97,7 +97,7 @@ The response is the newly created employee object
 
 ### Request
 
-`POST /employees/{name}/schedule/`
+`POST /employees/{name}/schedule`
 
 Body
 
@@ -116,7 +116,7 @@ Body
 		"end": "12:00"
 	},
 	"sun": {
-		"start": "23:00",
+		"start": "00:00",
 		"end": "06:30"
 	},
 	"fri": {
@@ -147,7 +147,7 @@ The start and end field must be a string and in the format of "hh:mm". The sched
 
 ### Request
 
-`GET /employees/`
+`GET /employees`
 
 Default gets all employees
 
@@ -160,7 +160,7 @@ Default gets all employees
 ### Response
 
 ```json
-200
+200 OK
 
 [
 {
@@ -184,261 +184,115 @@ Default gets all employees
 
 Returns an array of employees that matched the request.
 
-## Get a non-existent Thing
+## Get employees working today
 
 ### Request
 
-`GET /thing/id`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/9999
+`GET /employees/today`
 
 ### Response
 
-    HTTP/1.1 404 Not Found
-    Date: Thu, 24 Feb 2011 12:36:30 GMT
-    Status: 404 Not Found
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 35
+```json
+200 OK
 
-    {"status":404,"reason":"Not found"}
+[
+{
+  "name": "John Doe",
+  "warehouse": "63567e7c8ad7840870ff0a56",
+  "role": "6357aa51a41aca5cf4b25628",
+  "schedule": {
+    "sun": [...],
+    "mon": [...],
+    "tue": [...],
+    "wed": [...],
+    "thu": [...],
+    "fri": [...],
+    "sat": [...]
+  },
+  "_id": "635a6bb6ff20a2093404c0bc",
+  "__v": 0
+},
+...]
+```
 
-## Create another new Thing
+Returns an array of employees that in their schedule would work today.
+
+## Get employees working at this time
 
 ### Request
 
-`POST /thing/`
-
-    curl -i -H 'Accept: application/json' -d 'name=Bar&junk=rubbish' http://localhost:7000/thing
+`GET /employees/working`
 
 ### Response
 
-    HTTP/1.1 201 Created
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 201 Created
-    Connection: close
-    Content-Type: application/json
-    Location: /thing/2
-    Content-Length: 35
+```json
+200 OK
 
-    {"id":2,"name":"Bar","status":null}
+[
+{
+  "name": "John Doe",
+  "warehouse": "63567e7c8ad7840870ff0a56",
+  "role": "6357aa51a41aca5cf4b25628",
+  "schedule": {
+    "sun": [...],
+    "mon": [...],
+    "tue": [...],
+    "wed": [...],
+    "thu": [...],
+    "fri": [...],
+    "sat": [...]
+  },
+  "_id": "635a6bb6ff20a2093404c0bc",
+  "__v": 0
+},
+...]
+```
 
-## Get list of Things again
+Returns an array of employees that in their schedule would work right at the request.
+
+## Get employee by name
 
 ### Request
 
-`GET /thing/`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/
+`GET /employees/{name}`
 
 ### Response
 
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 74
-
-    [{"id":1,"name":"Foo","status":"new"},{"id":2,"name":"Bar","status":null}]
-
-## Change a Thing's state
-
-### Request
-
-`PUT /thing/:id/status/changed`
-
-    curl -i -H 'Accept: application/json' -X PUT http://localhost:7000/thing/1/status/changed
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 40
-
-    {"id":1,"name":"Foo","status":"changed"}
-
-## Get changed Thing
-
-### Request
-
-`GET /thing/id`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 40
-
-    {"id":1,"name":"Foo","status":"changed"}
-
-## Change a Thing
-
-### Request
-
-`PUT /thing/:id`
-
-    curl -i -H 'Accept: application/json' -X PUT -d 'name=Foo&status=changed2' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:31 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 41
-
-    {"id":1,"name":"Foo","status":"changed2"}
-
-## Attempt to change a Thing using partial params
-
-### Request
-
-`PUT /thing/:id`
-
-    curl -i -H 'Accept: application/json' -X PUT -d 'status=changed3' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 41
-
-    {"id":1,"name":"Foo","status":"changed3"}
-
-## Attempt to change a Thing using invalid params
-
-### Request
-
-`PUT /thing/:id`
-
-    curl -i -H 'Accept: application/json' -X PUT -d 'id=99&status=changed4' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 41
-
-    {"id":1,"name":"Foo","status":"changed4"}
-
-## Change a Thing using the \_method hack
-
-### Request
-
-`POST /thing/:id?_method=POST`
-
-    curl -i -H 'Accept: application/json' -X POST -d 'name=Baz&_method=PUT' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 200 OK
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 200 OK
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 41
-
-    {"id":1,"name":"Baz","status":"changed4"}
-
-## Change a Thing using the \_method hack in the url
-
-### Request
-
-`POST /thing/:id?_method=POST`
-
-    curl -i -H 'Accept: application/json' -X POST -d 'name=Qux' http://localhost:7000/thing/1?_method=PUT
-
-### Response
-
-    HTTP/1.1 404 Not Found
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 404 Not Found
-    Connection: close
-    Content-Type: text/html;charset=utf-8
-    Content-Length: 35
-
-    {"status":404,"reason":"Not found"}
-
-## Delete a Thing
-
-### Request
-
-`DELETE /thing/id`
-
-    curl -i -H 'Accept: application/json' -X DELETE http://localhost:7000/thing/1/
-
-### Response
-
-    HTTP/1.1 204 No Content
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 204 No Content
-    Connection: close
-
-## Try to delete same Thing again
-
-### Request
-
-`DELETE /thing/id`
-
-    curl -i -H 'Accept: application/json' -X DELETE http://localhost:7000/thing/1/
-
-### Response
-
-    HTTP/1.1 404 Not Found
-    Date: Thu, 24 Feb 2011 12:36:32 GMT
-    Status: 404 Not Found
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 35
-
-    {"status":404,"reason":"Not found"}
-
-## Get deleted Thing
-
-### Request
-
-`GET /thing/1`
-
-    curl -i -H 'Accept: application/json' http://localhost:7000/thing/1
-
-### Response
-
-    HTTP/1.1 404 Not Found
-    Date: Thu, 24 Feb 2011 12:36:33 GMT
-    Status: 404 Not Found
-    Connection: close
-    Content-Type: application/json
-    Content-Length: 35
-
-    {"status":404,"reason":"Not found"}
-
-## Delete a Thing using the \_method hack
-
-### Request
-
-`DELETE /thing/id`
-
-    curl -i -H 'Accept: application/json' -X POST -d'_method=DELETE' http://localhost:7000/thing/2/
-
-### Response
-
-    HTTP/1.1 204 No Content
-    Date: Thu, 24 Feb 2011 12:36:33 GMT
-    Status: 204 No Content
-    Connection: close
+```json
+200 OK
+
+{
+  "name": "John Doe",
+  "warehouse": {
+    "name": "Warehouse1",
+    "products": [...],
+    "_id": "63567e7c8ad7840870ff0a56",
+    "__v": 2
+  },
+  "role": {
+    "_id": "6357aa51a41aca5cf4b25628",
+    "title": "Admin",
+    "level": 5
+  },
+  "schedule": {
+    "sun": [...],
+    "mon": [...],
+    "tue": [...],
+    "wed": [...],
+    "thu": [...],
+    "fri": [...],
+    "sat": [...]
+  },
+  "_id": "6357aaae4bf7433827b6c191",
+  "__v": 0
+}
+```
+
+Returns the employee which name matches the name in the parameter
+
+#### Errors
+
+| Code | Message               | Meaning                                                                            |
+| ---- | --------------------- | ---------------------------------------------------------------------------------- |
+| 404  | Employee not found    | An employee with the name that matches the parameter was not found in the database |
+| 500  | Internal Server Error | An Unexpected internal server error has occured                                    |

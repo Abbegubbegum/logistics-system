@@ -53,7 +53,6 @@ export function getGrabbersWorkingATimestep(
 	return new Promise<IEmployee[]>((resolve, reject) => {
 		employeeModel
 			.find({ [`schedule.${dayKey}.${timestepIndex}`]: true })
-			.populate("role")
 			.then((employees) => {
 				resolve(
 					employees.filter(

@@ -49,8 +49,13 @@ app.post("/login", (req, res) => {
 });
 
 app.listen(port, () => {
-	mongoose.connect(dbURL).then(() => {
-		console.log("Connected to database");
-	});
+	mongoose
+		.connect(dbURL)
+		.then(() => {
+			console.log("Connected to database");
+		})
+		.catch((err) => {
+			console.log(err);
+		});
 	console.log("Listening on http://localhost:" + port);
 });

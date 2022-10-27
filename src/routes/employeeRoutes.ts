@@ -97,7 +97,7 @@ router.get("/today", (req, res) => {
 		});
 });
 
-router.get("/available", (req, res) => {
+router.get("/working", (req, res) => {
 	let now = new Date();
 	let key;
 
