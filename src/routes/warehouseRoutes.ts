@@ -3,7 +3,6 @@ import {
 	addProductToWarehouse,
 	createWarehouse,
 	getAllWarehouses,
-	getWarehouseByName,
 } from "../controllers/warehouseController.js";
 import { getProductIDByName } from "../controllers/productController.js";
 
@@ -35,11 +34,16 @@ router.post("/", (req, res) => {
 	};
 
 	createWarehouse(warehouse)
-		.then(() => {
-			res.sendStatus(201);
+		.then((newDoc) => {
+			res.status(201).json(newDoc);
 		})
-		.catch((err) => {
-			res.sendStatus(500);
+		.catch((err: Error) => {
+			if (err.message === "Duplicate warehouse") {
+				res.status(400).send("Warehouse with name already exists");
+				return;
+			} else {
+				res.sendStatus(500);
+			}
 		});
 });
 
@@ -64,18 +68,22 @@ router.put("/:warehouse/products", async (req, res) => {
 		return;
 	}
 
+	let error = false;
+
 	let productID;
 
 	try {
 		productID = await getProductIDByName(productName);
 	} catch (err) {
+		error = true;
 		if (err instanceof Error) {
 			res.status(404).send("Product not found");
 		} else {
 			res.sendStatus(500);
 		}
-		return;
 	}
+
+	if (error) return;
 
 	let product: any = {
 		product: productID,
@@ -86,14 +94,12 @@ router.put("/:warehouse/products", async (req, res) => {
 	console.log(product);
 
 	addProductToWarehouse(warehouseName, product)
-		.then(() => {
-			res.sendStatus(201);
+		.then((newDoc) => {
+			res.status(201).json(newDoc);
 		})
 		.catch((err: Error) => {
 			if (err.message === "Warehouse not found") {
 				res.status(404).send("Warehouse not found");
-			} else if (err.message === "Duplicate warehouse") {
-				res.status(400).send("Bad request, duplicate warehouse name");
 			} else {
 				res.sendStatus(500);
 			}

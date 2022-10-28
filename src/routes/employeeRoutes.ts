@@ -169,7 +169,7 @@ router.get("/:name/orders", (req, res) => {
 		});
 });
 
-router.get("/grabbers/available", (req, res) => {
+router.get("/grabbers/working", (req, res) => {
 	let now = new Date();
 	let key;
 

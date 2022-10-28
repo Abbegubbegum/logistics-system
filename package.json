@@ -5,6 +5,7 @@
 	"main": "out/index.js",
 	"type": "module",
 	"scripts": {
+		"start": "tsc && node out/index.js",
 		"dev": "tsc --watch",
 		"build": "tsc",
 		"serve": "nodemon out/index.js"

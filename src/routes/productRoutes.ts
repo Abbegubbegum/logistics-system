@@ -46,12 +46,12 @@ router.post("/", (req, res) => {
 	};
 
 	createProduct(product)
-		.then(() => {
-			res.sendStatus(201);
+		.then((newDoc) => {
+			res.status(201).json(newDoc);
 		})
 		.catch((err: Error) => {
 			if (err.message === "Duplicate product") {
-				res.status(400).send("Bad request, duplicate product name");
+				res.status(400).send("Product with name already exists");
 			} else {
 				res.sendStatus(500);
 			}

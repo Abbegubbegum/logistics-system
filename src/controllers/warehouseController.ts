@@ -9,6 +9,7 @@ export function getAllWarehouses() {
 	return new Promise<IWarehouse[]>((resolve, reject) => {
 		warehouseModel
 			.find()
+			.populate("products.product")
 			.then((warehouses) => {
 				resolve(warehouses);
 			})
@@ -81,11 +82,11 @@ export function getWarehousesWithProduct(productName: string) {
 }
 
 export function createWarehouse(warehouse: IWarehouse) {
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<IWarehouse>((resolve, reject) => {
 		warehouseModel
 			.create(warehouse)
-			.then(() => {
-				resolve();
+			.then((newDoc) => {
+				resolve(newDoc);
 			})
 			.catch((err) => {
 				if (err.code === 11000) {
@@ -101,7 +102,7 @@ export function addProductToWarehouse(
 	warehouseName: string,
 	product: IWarehouseProduct
 ) {
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<any>((resolve, reject) => {
 		warehouseModel
 			.findOneByName(warehouseName)
 			.then(async (warehouse) => {
@@ -109,7 +110,13 @@ export function addProductToWarehouse(
 					warehouse.products.push(product);
 					try {
 						await warehouse.save();
-						resolve();
+						await warehouse.populate(
+							`products.${warehouse.products.length - 1}.product`
+						);
+
+						let newDoc = warehouse.products.at(-1);
+
+						resolve(newDoc);
 					} catch (err) {
 						console.log(err);
 						reject();

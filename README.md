@@ -296,3 +296,298 @@ Returns the employee which name matches the name in the parameter
 | ---- | --------------------- | ---------------------------------------------------------------------------------- |
 | 404  | Employee not found    | An employee with the name that matches the parameter was not found in the database |
 | 500  | Internal Server Error | An Unexpected internal server error has occured                                    |
+
+## Get employees working today
+
+### Request
+
+`GET /grabbers/working`
+
+### Response
+
+```json
+200 OK
+
+[
+{
+  "name": "John Doe",
+  "warehouse": "63567e7c8ad7840870ff0a56",
+  "role": {
+    "_id": "6357aa51a41aca5cf4b25628",
+    "title": "Grabber",
+    "level": 1
+  },
+  "schedule": {
+    "sun": [...],
+    "mon": [...],
+    "tue": [...],
+    "wed": [...],
+    "thu": [...],
+    "fri": [...],
+    "sat": [...]
+  },
+  "_id": "635a6bb6ff20a2093404c0bc",
+  "__v": 0
+},
+...]
+```
+
+Returns an array of employees that would work right at the request and which role also has the title of grabber.
+
+## Delete all employees
+
+### Request
+
+`DELETE /employees`
+
+### Response
+
+    200 OK
+
+Deletes all employee documents
+
+## Delete employee with name
+
+### Request
+
+`DELETE /employees/{name}`
+
+### Response
+
+    200 OK
+
+Deletes the employee document that matches the name
+
+#### Errors
+
+| Code | Message               | Meaning                                                                            |
+| ---- | --------------------- | ---------------------------------------------------------------------------------- |
+| 404  | Employee not found    | An employee with the name that matches the parameter was not found in the database |
+| 500  | Internal Server Error | An Unexpected internal server error has occured                                    |
+
+# Warehouses
+
+## Create new warehouse
+
+### Request
+
+`POST /warehouses`
+
+```json
+{
+	"name": "Warehouse1"
+}
+```
+
+| Field | Type   | Value                                 |
+| ----- | ------ | ------------------------------------- |
+| name  | string | Name of the warehouse, must be unique |
+
+### Response
+
+```json
+201 Created
+
+{
+	"name": "Warehouse1",
+	"products": [],
+	"_id": "635b81c7881d4487c5234df0",
+	"__v": 0
+}
+```
+
+| Field    | Type   | Value                                            |
+| -------- | ------ | ------------------------------------------------ |
+| name     | string | The name of the Warehouse                        |
+| products | Array  | An array of products that the warehouse contains |
+| id       | string | The id of the new warehouse document             |
+
+#### Errors
+
+| Code | Message                            | Meaning                                                                   |
+| ---- | ---------------------------------- | ------------------------------------------------------------------------- |
+| 400  | Bad request, name must be a string | The name field in the request is the wrong type, or missing from the body |
+| 400  | Warehouse with name already exists | The name sent in already exists in the database, it needs to be unique    |
+| 500  | Internal Server Error              | An Unexpected internal server error has occured                           |
+
+## Add product to warehouse
+
+### Request
+
+`PUT /warehouses/{name}/products`
+
+```json
+{
+	"product": "Ball",
+	"quantity": 4,
+	"shelfID": "5C"
+}
+```
+
+| Field    | Type   | Value                                                              |
+| -------- | ------ | ------------------------------------------------------------------ |
+| product  | string | Name of the existing product that should be added to the warehouse |
+| quantity | number | The quantity of the product that exists in the warehouse           |
+| shelfID  | string | A string used to sort and keep track of items in the warehouse     |
+
+### Response
+
+The response is the newly created product object
+
+```json
+201 Created
+
+{
+	"product": {
+		"_id": "6357a92e4bf7433827b6c144",
+		"name": "Ball",
+		"price": 99,
+		"weight": 3,
+		"__v": 0
+	},
+	"quantity": 4,
+	"shelfID": "5C",
+	"_id": "635b85e991e8c27578c651cc"
+}
+```
+
+| Field    | Type   | Value                                              |
+| -------- | ------ | -------------------------------------------------- |
+| product  | object | The product document with a name, price and weight |
+| quantity | number | The entered quantity                               |
+| shelfID  | string | The entered shelfID                                |
+| id       | string | The id for the document                            |
+
+#### Errors
+
+| Code | Message                              | Meaning                                                                      |
+| ---- | ------------------------------------ | ---------------------------------------------------------------------------- |
+| 400  | Bad request, \_\_\_ must be a \_\_\_ | One of the fields in the request is the wrong type, or missing from the body |
+| 404  | Product not found                    | A product with the entered name was not found in the database                |
+| 404  | Warehouse not found                  | A warehouse with the name of the parameter was not found in the database     |
+| 500  | Internal Server Error                | An Unexpected internal server error has occured                              |
+
+## Get all warehouses
+
+### Request
+
+`GET /warehouses`
+
+### Response
+
+```json
+200 OK
+
+[
+	{
+		"name": "Warehouse1",
+		"products": [
+			{
+				"product": {
+					"_id": "6357a92e4bf7433827b6c144",
+					"name": "Ball",
+					"price": 99,
+					"weight": 3,
+					"__v": 0
+				},
+				"quantity": 4,
+				"shelfID": "5C",
+				"_id": "635b85e991e8c27578c651cc"
+			},
+        ...
+        ],
+		"_id": "635b81c7881d4487c5234df0",
+		"__v": 0
+	},
+...
+]
+```
+
+Returns an array of all warehouses in the database
+
+# Products
+
+## Create new product
+
+### Request
+
+`POST /products`
+
+```json
+{
+	"name": "Ball",
+	"price": 99,
+	"weight": 3
+}
+```
+
+| Field             | Type   | Value                                    |
+| ----------------- | ------ | ---------------------------------------- |
+| name              | string | Name of the product, must be unique      |
+| price (optional)  | number | The price of this product, default is 0  |
+| weight (optional) | number | The weight of this product, default is 0 |
+
+### Response
+
+Returns the created document
+
+```json
+201 Created
+
+{
+  "name": "Ball",
+	"price": 99,
+	"weight": 3,
+	"_id": "6357a92e4bf7433827b6c144",
+	"__v": 0
+},
+```
+
+#### Errors
+
+| Code | Message                                           | Meaning                                                                   |
+| ---- | ------------------------------------------------- | ------------------------------------------------------------------------- |
+| 400  | Bad request, name must be a string                | The name field in the request is the wrong type, or missing from the body |
+| 400  | Bad request, \_\_\_ must be a number or undefined | One of the fields sent is the wrong type                                  |
+| 400  | Product with name already exists                  | A product with the name already exists in the database                    |
+| 500  | Internal Server Error                             | An Unexpected internal server error has occured                           |
+
+## Get products available stock
+
+### Request
+
+`GET /products/{product}/stock`
+
+### Response
+
+Returns an array of the warehouses which has the specified product in its products
+
+```json
+200 OK
+
+[
+	{
+		"name": "Warehouse1",
+		"products": [
+			{
+				"product": {
+					"_id": "6357a92e4bf7433827b6c144",
+					"name": "Ball",
+					"price": 99,
+					"weight": 3,
+					"__v": 0
+				},
+				"quantity": 4,
+				"shelfID": "5C",
+				"_id": "635b85e991e8c27578c651cc"
+			},
+        ...
+        ],
+		"_id": "635b81c7881d4487c5234df0",
+		"__v": 0
+	},
+...
+]
+```
+
+# Orders

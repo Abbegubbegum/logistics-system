@@ -38,11 +38,11 @@ export function getProductIDByName(name: string) {
 }
 
 export function createProduct(product: IProduct) {
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<IProduct>((resolve, reject) => {
 		productModel
 			.create(product)
-			.then(() => {
-				resolve();
+			.then((newDoc) => {
+				resolve(newDoc);
 			})
 			.catch((err) => {
 				if (err.code === 11000) {
