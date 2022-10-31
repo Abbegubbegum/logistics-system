@@ -88,6 +88,7 @@ export function getAllPackedOrders() {
 			.populate("products.product")
 			.populate({
 				path: "grabber",
+				select: "-schedule",
 				populate: { path: "warehouse", select: "name" },
 			})
 			.then((orders) => {
@@ -109,6 +110,7 @@ export function getOldestPackedOrder() {
 			.populate("products.product")
 			.populate({
 				path: "grabber",
+				select: "-schedule",
 				populate: { path: "warehouse", select: "name" },
 			})
 			.then((orders) => {
@@ -184,6 +186,7 @@ export function getMostExpensiveOrder() {
 			.find()
 			.sort({ cost: "desc" })
 			.limit(1)
+			.populate("products.product")
 			.then((order) => {
 				resolve(order);
 			})
@@ -204,6 +207,7 @@ export function getMostExpensiveOrderFromMonth(month: number) {
 			.find({ created_at: { $gte: firstDay, $lte: lastDay } })
 			.sort({ cost: "desc" })
 			.limit(1)
+			.populate("products.product")
 			.then((order) => {
 				resolve(order);
 			})
@@ -345,11 +349,12 @@ export function setOrderAsDelivered(id: string) {
 }
 
 export function createOrder(order: IOrder) {
-	return new Promise<void>((resolve, reject) => {
+	return new Promise<HydratedDocument<IOrder>>((resolve, reject) => {
 		orderModel
 			.create(order)
-			.then(() => {
-				resolve();
+			.then(async (newDoc) => {
+				await newDoc.populate("products.product");
+				resolve(newDoc);
 			})
 			.catch((err) => {
 				console.log(err);

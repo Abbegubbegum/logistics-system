@@ -32,7 +32,7 @@ router.get("/", (req, res) => {
 		let month = parseInt(req.query.month);
 
 		if (month > 0 && month <= 12) {
-			if (req.query.sum) {
+			if (req.query.sum !== undefined) {
 				getSumOfOrderCostsFromMonth(month)
 					.then((cost) => {
 						res.status(200).json({ cost });
@@ -54,7 +54,7 @@ router.get("/", (req, res) => {
 					});
 			}
 		} else {
-			if (req.query.sum) {
+			if (req.query.sum !== undefined) {
 				getSumOfAllOrderCosts()
 					.then((cost) => {
 						res.status(200).json({ cost });
@@ -77,7 +77,7 @@ router.get("/", (req, res) => {
 			}
 		}
 	} else {
-		if (req.query.sum) {
+		if (req.query.sum !== undefined) {
 			getSumOfAllOrderCosts()
 				.then((cost) => {
 					res.status(200).json({ cost });
@@ -130,9 +130,7 @@ router.post("/", async (req, res) => {
 			error = true;
 			return res
 				.status(400)
-				.send(
-					`Bad request at Product index ${index}, name must be a string`
-				);
+				.send(`Bad request at index ${index}, name must be a string`);
 		}
 
 		if (typeof product.quantity !== "number") {
@@ -140,7 +138,7 @@ router.post("/", async (req, res) => {
 			return res
 				.status(400)
 				.send(
-					`Bad request at Product index ${index}, quantity must be a number`
+					`Bad request at index ${index}, quantity must be a number`
 				);
 		}
 	});
@@ -166,7 +164,7 @@ router.post("/", async (req, res) => {
 				if (err.message === "Product not found") {
 					error = true;
 					res.status(404).send(
-						`Bad request at ${i}, couldn't find product`
+						`Bad request at index ${i}, couldn't find product`
 					);
 					return;
 				} else {
@@ -185,8 +183,8 @@ router.post("/", async (req, res) => {
 	};
 
 	createOrder(order)
-		.then(() => {
-			return res.status(201).json({ cost });
+		.then((newDoc) => {
+			return res.status(201).json(newDoc);
 		})
 		.catch((err) => {
 			return res.sendStatus(500);
@@ -316,13 +314,13 @@ router.put("/:orderID/grabber", orderIDParsing, async (req, res) => {
 	let order = (req as any).order;
 
 	if (typeof grabberName !== "string") {
-		return res.status(400).send("Bad Request, invalid name");
+		return res.status(400).send("Bad Request, name must be a string");
 	}
 
 	let error = false;
 
 	if (order.grabber) {
-		return res.status(400).send("Order already has a grabber asigned");
+		return res.status(400).send("Order already has a grabber assigned");
 	}
 
 	if (order.packed_at) {
@@ -339,7 +337,7 @@ router.put("/:orderID/grabber", orderIDParsing, async (req, res) => {
 			if (err.message === "Employee not found") {
 				return res.status(404).send("Employee not found");
 			} else {
-				return res.status(400).send("Employee not a grabber");
+				return res.status(400).send("Employee is not a grabber");
 			}
 		} else {
 			return res.sendStatus(500);
@@ -366,7 +364,7 @@ router.put("/:orderID/packed", orderIDParsing, async (req, res) => {
 	let order = (req as any).order;
 
 	if (!order.grabber) {
-		return res.status(400).send("Order doesn't have a grabber asigned");
+		return res.status(400).send("Order doesn't have a grabber assigned");
 	}
 
 	if (order.packed_at) {
@@ -398,7 +396,7 @@ router.put("/:orderID/driver", orderIDParsing, async (req, res) => {
 	let error = false;
 
 	if (order.driver) {
-		return res.status(400).send("Order already has a driver asigned");
+		return res.status(400).send("Order already has a driver assigned");
 	}
 
 	if (order.delivered_at) {
@@ -442,7 +440,7 @@ router.put("/:orderID/delivered", orderIDParsing, async (req, res) => {
 	let order = (req as any).order;
 
 	if (!order.driver) {
-		return res.status(400).send("Order doesn't have a driver asigned");
+		return res.status(400).send("Order doesn't have a driver assigned");
 	}
 
 	if (order.delivered_at) {
