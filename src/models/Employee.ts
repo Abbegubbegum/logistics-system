@@ -36,16 +36,11 @@ let employeeSchema = new Schema(
 	}
 );
 
-export function createEmptySchedule() {
-	let schedule = [];
+export function createEmptySchedule(): Array<Boolean> {
 	let timestep = 30;
 	let sections = 1440 / timestep;
 
-	for (let i = 0; i < sections; i++) {
-		schedule[i] = false;
-	}
-
-	return schedule;
+	return new Array(sections).fill(false);
 }
 
 export type IEmployee = InferSchemaType<typeof employeeSchema>;
