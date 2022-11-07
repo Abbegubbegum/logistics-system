@@ -612,7 +612,7 @@ Returns an array of the warehouses which has the specified product in its produc
 
 | Field    | Type   | Value                                                             |
 | -------- | ------ | ----------------------------------------------------------------- |
-| products | array  | An arraw of the products and the quantity that the order contains |
+| products | array  | An array of the products and the quantity that the order contains |
 | name     | string | The name of the existing product                                  |
 | quantity | number | The amount of the product in the order                            |
 
